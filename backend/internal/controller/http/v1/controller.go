@@ -42,12 +42,10 @@ func NewGeoController(geoService usecase.GeoServicer, responder rr.ReadResponder
 // @Router /address/search [post]
 func (g *GeoController) AddressSearch(w http.ResponseWriter, r *http.Request) {
 	var req AddressSearch
+	_ = g.rr.ReadJSON(w, r, &req)
 
-	if err := g.rr.ReadJSON(w, r, &req); err != nil {
-		g.rr.WriteJSONError(w, err)
-		return
-	} else if req.Query == "" {
-		g.rr.WriteJSONError(w, errors.New("query is required"))
+	if req.Query == "" {
+		_ = g.rr.WriteJSONError(w, errors.New("query is required"))
 		return
 	}
 
@@ -59,7 +57,7 @@ func (g *GeoController) AddressSearch(w http.ResponseWriter, r *http.Request) {
 		Data:    addresses,
 	}
 
-	g.rr.WriteJSON(w, http.StatusOK, resp)
+	_ = g.rr.WriteJSON(w, http.StatusOK, resp)
 }
 
 // AddressGeocode
@@ -74,11 +72,10 @@ func (g *GeoController) AddressSearch(w http.ResponseWriter, r *http.Request) {
 // @Router /address/geocode [post]
 func (g *GeoController) AddressGeocode(w http.ResponseWriter, r *http.Request) {
 	var req AddressGeocode
-	if err := g.rr.ReadJSON(w, r, &req); err != nil {
-		g.rr.WriteJSONError(w, err)
-		return
-	} else if req.Lat == "" || req.Lng == "" {
-		g.rr.WriteJSONError(w, errors.New("both lat and lng are required"))
+	_ = g.rr.ReadJSON(w, r, &req)
+
+	if req.Lat == "" || req.Lng == "" {
+		_ = g.rr.WriteJSONError(w, errors.New("both lat and lng are required"))
 		return
 	}
 
@@ -90,5 +87,5 @@ func (g *GeoController) AddressGeocode(w http.ResponseWriter, r *http.Request) {
 		Data:    addresses,
 	}
 
-	g.rr.WriteJSON(w, http.StatusOK, resp)
+	_ = g.rr.WriteJSON(w, http.StatusOK, resp)
 }

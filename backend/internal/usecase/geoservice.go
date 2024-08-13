@@ -12,6 +12,7 @@ import (
 	"strings"
 )
 
+//go:generate mockgen -source=./geoservice.go -destination=../mocks/mock_geoservice/mock_geoservice.go
 type GeoServicer interface {
 	AddressSearch(input string) ([]*entity.Address, error)
 	GeoCode(lat, lng string) ([]*entity.Address, error)
