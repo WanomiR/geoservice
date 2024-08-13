@@ -8,6 +8,11 @@ import (
 	"log"
 )
 
+//go:generate mockgen -source=./proxy.go -destination=../../../mocks/mock_redis/mock_redis.go
+type RedisPooler interface {
+	Dial() (redis.Conn, error)
+}
+
 type GeoCacheProxy struct {
 	geo   GeoServicer
 	redis *redis.Pool
@@ -40,7 +45,7 @@ func (p *GeoCacheProxy) AddressSearch(input string) (addresses []*entity.Address
 		return nil, e.Wrap("error fetching addresses", err)
 	}
 
-	serialized, err := json.Marshal(addresses)
+	serialized, _ := json.Marshal(addresses)
 	if _, err = conn.Do("SETEX", input, 60*60*24, serialized); err != nil {
 		log.Println("error caching addresses", err)
 	}

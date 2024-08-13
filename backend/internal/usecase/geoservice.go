@@ -25,19 +25,18 @@ type GeoService struct {
 }
 
 func NewGeoService(apiKey, secretKey string) *GeoService {
-	var err error
 	endpointUrl, err := url.Parse("https://suggestions.dadata.ru/suggestions/api/4_1/rs/")
 	if err != nil {
 		return nil
 	}
 
-	creds := client.Credentials{
+	credentials := client.Credentials{
 		ApiKeyValue:    apiKey,
 		SecretKeyValue: secretKey,
 	}
 
 	api := suggest.Api{
-		Client: client.NewClient(endpointUrl, client.WithCredentialProvider(&creds)),
+		Client: client.NewClient(endpointUrl, client.WithCredentialProvider(&credentials)),
 	}
 
 	return &GeoService{
@@ -80,10 +79,8 @@ func (g *GeoService) GeoCode(lat, lng string) ([]*entity.Address, error) {
 	}
 	var geoCode entity.GeoCode
 
-	err = json.NewDecoder(resp.Body).Decode(&geoCode)
-	if err != nil {
-		return nil, err
-	}
+	_ = json.NewDecoder(resp.Body).Decode(&geoCode)
+
 	var res []*entity.Address
 	for _, r := range geoCode.Suggestions {
 		var address entity.Address
