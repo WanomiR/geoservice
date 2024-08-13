@@ -23,6 +23,8 @@ import (
 type Config struct {
 	host      string
 	port      string
+	redisHost string
+	redisPort string
 	apiKey    string
 	secretKey string
 }
@@ -67,8 +69,12 @@ func (a *App) init() error {
 		return err
 	}
 
-	a.controller = v1.NewGeoController(
+	geoService := usecase.NewGeoCacheProxy(
 		usecase.NewGeoService(a.config.apiKey, a.config.secretKey),
+		fmt.Sprintf("%s:%s", a.config.redisHost, a.config.redisPort),
+	)
+	a.controller = v1.NewGeoController(
+		geoService,
 		rr.NewReadRespond(),
 	)
 
@@ -99,6 +105,8 @@ func (a *App) readConfig(envPath ...string) (err error) {
 	a.config = Config{
 		host:      os.Getenv("HOST"),
 		port:      os.Getenv("PORT"),
+		redisHost: os.Getenv("REDIS_HOST"),
+		redisPort: os.Getenv("REDIS_PORT"),
 		apiKey:    os.Getenv("DADATA_API_KEY"),
 		secretKey: os.Getenv("DADATA_SECRET_KEY"),
 	}

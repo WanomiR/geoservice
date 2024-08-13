@@ -23,8 +23,6 @@ type GeoService struct {
 	secretKey string
 }
 
-type GeoServiceProxy struct{}
-
 func NewGeoService(apiKey, secretKey string) *GeoService {
 	var err error
 	endpointUrl, err := url.Parse("https://suggestions.dadata.ru/suggestions/api/4_1/rs/")
