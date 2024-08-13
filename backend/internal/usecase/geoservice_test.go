@@ -1,4 +1,4 @@
-package service
+package usecase
 
 import (
 	"github.com/joho/godotenv"
@@ -13,7 +13,7 @@ var (
 )
 
 func init() {
-	err := godotenv.Load("../../../../.env")
+	err := godotenv.Load("../../.env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}

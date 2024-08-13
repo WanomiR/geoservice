@@ -6,16 +6,12 @@ import (
 	"log"
 )
 
-// @title GoLibrary
+// @title GeoService
 // @version 1.0.0
-// @description Library API
+// @description Geoservice API
 
 // @host localhost:8888
 // @basePath /
-
-// @securityDefinitions.apiKey ApiKeyAuth
-// @in header
-// @name Authorization
 func main() {
 	a, err := app.NewApp()
 	if err != nil {
@@ -24,5 +20,5 @@ func main() {
 
 	go a.Start()
 
-	a.Stop()
+	a.Shutdown()
 }

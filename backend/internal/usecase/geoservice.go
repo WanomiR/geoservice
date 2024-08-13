@@ -1,6 +1,7 @@
-package service
+package usecase
 
 import (
+	"backend/internal/entity"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -8,15 +9,21 @@ import (
 	"github.com/ekomobile/dadata/v2/client"
 	"net/http"
 	"net/url"
-	"proxy/internal/modules/geo/entities"
 	"strings"
 )
+
+type GeoServicer interface {
+	AddressSearch(input string) ([]*entity.Address, error)
+	GeoCode(lat, lng string) ([]*entity.Address, error)
+}
 
 type GeoService struct {
 	api       *suggest.Api
 	apiKey    string
 	secretKey string
 }
+
+type GeoServiceProxy struct{}
 
 func NewGeoService(apiKey, secretKey string) *GeoService {
 	var err error
@@ -41,8 +48,8 @@ func NewGeoService(apiKey, secretKey string) *GeoService {
 	}
 }
 
-func (g *GeoService) AddressSearch(input string) ([]*entities.Address, error) {
-	var res []*entities.Address
+func (g *GeoService) AddressSearch(input string) ([]*entity.Address, error) {
+	var res []*entity.Address
 	rawRes, err := g.api.Address(context.Background(), &suggest.RequestParams{Query: input})
 	if err != nil {
 		return nil, err
@@ -52,13 +59,13 @@ func (g *GeoService) AddressSearch(input string) ([]*entities.Address, error) {
 		if r.Data.City == "" || r.Data.Street == "" {
 			continue
 		}
-		res = append(res, &entities.Address{City: r.Data.City, Street: r.Data.Street, House: r.Data.House, Lat: r.Data.GeoLat, Lon: r.Data.GeoLon})
+		res = append(res, &entity.Address{City: r.Data.City, Street: r.Data.Street, House: r.Data.House, Lat: r.Data.GeoLat, Lon: r.Data.GeoLon})
 	}
 
 	return res, nil
 }
 
-func (g *GeoService) GeoCode(lat, lng string) ([]*entities.Address, error) {
+func (g *GeoService) GeoCode(lat, lng string) ([]*entity.Address, error) {
 	httpClient := &http.Client{}
 	var data = strings.NewReader(fmt.Sprintf(`{"lat": %s, "lon": %s}`, lat, lng))
 	req, err := http.NewRequest("POST", "https://suggestions.dadata.ru/suggestions/api/4_1/rs/geolocate/address", data)
@@ -72,15 +79,15 @@ func (g *GeoService) GeoCode(lat, lng string) ([]*entities.Address, error) {
 	if err != nil {
 		return nil, err
 	}
-	var geoCode entities.GeoCode
+	var geoCode entity.GeoCode
 
 	err = json.NewDecoder(resp.Body).Decode(&geoCode)
 	if err != nil {
 		return nil, err
 	}
-	var res []*entities.Address
+	var res []*entity.Address
 	for _, r := range geoCode.Suggestions {
-		var address entities.Address
+		var address entity.Address
 		address.City = string(r.Data.City)
 		address.Street = string(r.Data.Street)
 		address.House = r.Data.House

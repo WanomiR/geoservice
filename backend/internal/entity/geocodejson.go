@@ -1,4 +1,4 @@
-package entities
+package entity
 
 type GeoCode struct {
 	Suggestions []Suggestion `json:"suggestions"`
