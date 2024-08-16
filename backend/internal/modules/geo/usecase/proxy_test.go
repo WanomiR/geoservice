@@ -1,8 +1,8 @@
 package usecase
 
 import (
-	"backend/internal/entity"
 	mock_usecase "backend/internal/mocks/mock_geoservice"
+	"backend/internal/modules/geo/entity"
 	"github.com/golang/mock/gomock"
 	"github.com/gomodule/redigo/redis"
 	"github.com/rafaeljusto/redigomock"

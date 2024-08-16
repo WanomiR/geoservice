@@ -2,7 +2,7 @@ package v1
 
 import (
 	"backend/internal/lib/rr"
-	"backend/internal/usecase"
+	"backend/internal/modules/geo/usecase"
 	"errors"
 	"net/http"
 )

@@ -1,10 +1,9 @@
 package app
 
 import (
-	v1 "backend/internal/controller/http/v1"
 	"backend/internal/lib/e"
-	"backend/internal/lib/rr"
-	"backend/internal/usecase"
+	"backend/internal/modules"
+	"backend/internal/modules/geo/usecase"
 	"context"
 	"errors"
 	"fmt"
@@ -30,10 +29,11 @@ type Config struct {
 }
 
 type App struct {
-	config     Config
-	server     *http.Server
-	signalChan chan os.Signal
-	controller v1.Controller
+	config      Config
+	server      *http.Server
+	signalChan  chan os.Signal
+	services    *modules.Services
+	controllers *modules.Controllers
 }
 
 func NewApp() (*App, error) {
@@ -73,10 +73,9 @@ func (a *App) init() error {
 		usecase.NewGeoService(a.config.apiKey, a.config.secretKey),
 		fmt.Sprintf("%s:%s", a.config.redisHost, a.config.redisPort),
 	)
-	a.controller = v1.NewGeoController(
-		geoService,
-		rr.NewReadRespond(),
-	)
+
+	a.services = modules.NewServices(geoService)
+	a.controllers = modules.NewControllers(a.services)
 
 	a.server = &http.Server{
 		Addr:         ":" + a.config.port,
@@ -120,8 +119,8 @@ func (a *App) routes() *chi.Mux {
 	r.Use(middleware.Recoverer)
 
 	r.Route("/address", func(r chi.Router) {
-		r.Post("/search", a.controller.AddressSearch)
-		r.Post("/geocode", a.controller.AddressGeocode)
+		r.Post("/search", a.controllers.Geo.AddressSearch)
+		r.Post("/geocode", a.controllers.Geo.AddressGeocode)
 	})
 
 	r.Get("/swagger/*", httpSwagger.Handler(

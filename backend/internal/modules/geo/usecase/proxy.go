@@ -1,8 +1,8 @@
 package usecase
 
 import (
-	"backend/internal/entity"
 	"backend/internal/lib/e"
+	"backend/internal/modules/geo/entity"
 	"encoding/json"
 	"github.com/gomodule/redigo/redis"
 	"log"

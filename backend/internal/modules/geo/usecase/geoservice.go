@@ -1,7 +1,7 @@
 package usecase
 
 import (
-	"backend/internal/entity"
+	entity2 "backend/internal/modules/geo/entity"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -12,10 +12,10 @@ import (
 	"strings"
 )
 
-//go:generate mockgen -source=./geoservice.go -destination=../mocks/mock_geoservice/mock_geoservice.go
+//go:generate mockgen -source=./geoservice.go -destination=../../../mocks/mock_geoservice/mock_geoservice.go
 type GeoServicer interface {
-	AddressSearch(input string) ([]*entity.Address, error)
-	GeoCode(lat, lng string) ([]*entity.Address, error)
+	AddressSearch(input string) ([]*entity2.Address, error)
+	GeoCode(lat, lng string) ([]*entity2.Address, error)
 }
 
 type GeoService struct {
@@ -46,8 +46,8 @@ func NewGeoService(apiKey, secretKey string) *GeoService {
 	}
 }
 
-func (g *GeoService) AddressSearch(input string) ([]*entity.Address, error) {
-	var res []*entity.Address
+func (g *GeoService) AddressSearch(input string) ([]*entity2.Address, error) {
+	var res []*entity2.Address
 	rawRes, err := g.api.Address(context.Background(), &suggest.RequestParams{Query: input})
 	if err != nil {
 		return nil, err
@@ -57,13 +57,13 @@ func (g *GeoService) AddressSearch(input string) ([]*entity.Address, error) {
 		if r.Data.City == "" || r.Data.Street == "" {
 			continue
 		}
-		res = append(res, &entity.Address{City: r.Data.City, Street: r.Data.Street, House: r.Data.House, Lat: r.Data.GeoLat, Lon: r.Data.GeoLon})
+		res = append(res, &entity2.Address{City: r.Data.City, Street: r.Data.Street, House: r.Data.House, Lat: r.Data.GeoLat, Lon: r.Data.GeoLon})
 	}
 
 	return res, nil
 }
 
-func (g *GeoService) GeoCode(lat, lng string) ([]*entity.Address, error) {
+func (g *GeoService) GeoCode(lat, lng string) ([]*entity2.Address, error) {
 	httpClient := &http.Client{}
 	var data = strings.NewReader(fmt.Sprintf(`{"lat": %s, "lon": %s}`, lat, lng))
 	req, err := http.NewRequest("POST", "https://suggestions.dadata.ru/suggestions/api/4_1/rs/geolocate/address", data)
@@ -77,13 +77,13 @@ func (g *GeoService) GeoCode(lat, lng string) ([]*entity.Address, error) {
 	if err != nil {
 		return nil, err
 	}
-	var geoCode entity.GeoCode
+	var geoCode entity2.GeoCode
 
 	_ = json.NewDecoder(resp.Body).Decode(&geoCode)
 
-	var res []*entity.Address
+	var res []*entity2.Address
 	for _, r := range geoCode.Suggestions {
-		var address entity.Address
+		var address entity2.Address
 		address.City = string(r.Data.City)
 		address.Street = string(r.Data.Street)
 		address.House = r.Data.House
