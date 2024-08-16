@@ -87,4 +87,48 @@ paths:
       summary: Search by street name
       tags:
       - address
+  /auth/login:
+    get:
+      parameters:
+      - description: Email for login
+        in: query
+        name: email
+        required: true
+        type: string
+      - description: Password for login
+        in: query
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/rr.JSONResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rr.JSONResponse'
+      summary: Logs user into the system
+      tags:
+      - auth
+  /auth/logout:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/rr.JSONResponse'
+      summary: Logs out current user
+      tags:
+      - auth
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

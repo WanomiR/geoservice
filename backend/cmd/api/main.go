@@ -4,6 +4,7 @@ import (
 	_ "backend/docs"
 	"backend/internal/app"
 	"log"
+	_ "net/http/pprof"
 )
 
 // @title GeoService
@@ -12,6 +13,10 @@ import (
 
 // @host localhost:8888
 // @basePath /
+
+// @securityDefinitions.apiKey ApiKeyAuth
+// @in header
+// @name Authorization
 func main() {
 	a, err := app.NewApp()
 	if err != nil {

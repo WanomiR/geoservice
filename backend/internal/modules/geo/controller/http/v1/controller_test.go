@@ -1,9 +1,9 @@
 package v1
 
 import (
-	"backend/internal/entity"
 	"backend/internal/lib/rr"
 	mock_usecase "backend/internal/mocks/mock_geoservice"
+	"backend/internal/modules/geo/entity"
 	"bytes"
 	"encoding/json"
 	"github.com/golang/mock/gomock"

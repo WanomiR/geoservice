@@ -5,7 +5,7 @@
 package mock_usecase
 
 import (
-	entity "backend/internal/entity"
+	"backend/internal/modules/geo/entity"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
