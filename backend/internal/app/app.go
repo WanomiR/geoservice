@@ -3,6 +3,7 @@ package app
 import (
 	"backend/internal/lib/e"
 	"backend/internal/modules"
+	usecaseAuth "backend/internal/modules/auth/usecase"
 	"backend/internal/modules/geo/usecase"
 	"context"
 	"errors"
@@ -23,6 +24,7 @@ import (
 type Config struct {
 	host      string
 	port      string
+	jwtSecret string
 	redisHost string
 	redisPort string
 	apiKey    string
@@ -75,14 +77,18 @@ func (a *App) init() error {
 		fmt.Sprintf("%s:%s", a.config.redisHost, a.config.redisPort),
 	)
 
-	a.services = modules.NewServices(geoService)
+	authService := usecaseAuth.NewAuthService(
+		a.config.host, a.config.host, a.config.jwtSecret, a.config.host,
+	)
+
+	a.services = modules.NewServices(geoService, authService)
 	a.controllers = modules.NewControllers(a.services)
 
 	a.server = &http.Server{
 		Addr:         ":" + a.config.port,
 		Handler:      a.routes(),
 		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 5 * time.Minute, // for profiling
+		WriteTimeout: 60 * time.Second, // for profiling
 	}
 
 	a.signalChan = make(chan os.Signal, 1)
@@ -105,6 +111,7 @@ func (a *App) readConfig(envPath ...string) (err error) {
 	a.config = Config{
 		host:      os.Getenv("HOST"),
 		port:      os.Getenv("PORT"),
+		jwtSecret: os.Getenv("JWT_SECRET"),
 		redisHost: os.Getenv("REDIS_HOST"),
 		redisPort: os.Getenv("REDIS_PORT"),
 		apiKey:    os.Getenv("DADATA_API_KEY"),
@@ -124,7 +131,14 @@ func (a *App) routes() *chi.Mux {
 		r.Post("/geocode", a.controllers.Geo.AddressGeocode)
 	})
 
+	r.Route("/auth", func(r chi.Router) {
+		r.Get("/login", a.controllers.Auth.Login)
+		r.Get("/logout", a.controllers.Auth.Logout)
+	})
+
 	r.Route("/debug/pprof/", func(r chi.Router) {
+		r.Use(a.services.Auth.RequireAuthorization)
+
 		r.Get("/", pprof.Index)
 		r.Get("/{cmd}", pprof.Index)
 		r.Get("/cmdline", pprof.Cmdline)

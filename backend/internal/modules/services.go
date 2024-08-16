@@ -1,11 +1,15 @@
 package modules
 
-import "backend/internal/modules/geo/usecase"
+import (
+	auth "backend/internal/modules/auth/usecase"
+	geo "backend/internal/modules/geo/usecase"
+)
 
 type Services struct {
-	Geo usecase.GeoServicer
+	Geo  geo.GeoServicer
+	Auth auth.AuthServicer
 }
 
-func NewServices(geo usecase.GeoServicer) *Services {
-	return &Services{Geo: geo}
+func NewServices(geo geo.GeoServicer, auth auth.AuthServicer) *Services {
+	return &Services{Geo: geo, Auth: auth}
 }

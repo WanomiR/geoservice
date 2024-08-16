@@ -19,6 +19,9 @@ Count	Profile
 full goroutine stack dump /mycustompath/debug/pprof/goroutine
 ```
 
+## Analysis
+При активной нагрузке (в виде множества заппросов на один эндпонит в течение нескольких секунд) узких мест не обнаружено. Бóльшая часть процессорного времени пришлась на вызовы системы (66.6%), остальные процессы распределены равномерно.
+
 ## Profiling Command
 To start profiling of http server run this command
 
@@ -47,6 +50,4 @@ Alternatively:
 curl --output profile "http://localhost:8888/debug/pprof/profile?seconds=30"
 go tool pprof -http localhost:3435 profile
 ```
-
-## Analysis
 
