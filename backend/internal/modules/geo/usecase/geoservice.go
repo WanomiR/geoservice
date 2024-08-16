@@ -1,21 +1,33 @@
 package usecase
 
 import (
-	entity2 "backend/internal/modules/geo/entity"
+	"backend/internal/modules/geo/entity"
 	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/ekomobile/dadata/v2/api/suggest"
 	"github.com/ekomobile/dadata/v2/client"
+	"github.com/prometheus/client_golang/prometheus"
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 )
+
+var reqTimeHist = prometheus.NewHistogram(prometheus.HistogramOpts{
+	Name:    "api_request_duration_seconds",
+	Help:    "API request duration in seconds",
+	Buckets: []float64{0.001, .005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10},
+})
+
+func init() {
+	prometheus.MustRegister(reqTimeHist)
+}
 
 //go:generate mockgen -source=./geoservice.go -destination=../../../mocks/mock_geoservice/mock_geoservice.go
 type GeoServicer interface {
-	AddressSearch(input string) ([]*entity2.Address, error)
-	GeoCode(lat, lng string) ([]*entity2.Address, error)
+	AddressSearch(input string) ([]*entity.Address, error)
+	GeoCode(lat, lng string) ([]*entity.Address, error)
 }
 
 type GeoService struct {
@@ -46,8 +58,12 @@ func NewGeoService(apiKey, secretKey string) *GeoService {
 	}
 }
 
-func (g *GeoService) AddressSearch(input string) ([]*entity2.Address, error) {
-	var res []*entity2.Address
+func (g *GeoService) AddressSearch(input string) ([]*entity.Address, error) {
+	// for measuring request duration
+	start := time.Now()
+
+	var res []*entity.Address
+
 	rawRes, err := g.api.Address(context.Background(), &suggest.RequestParams{Query: input})
 	if err != nil {
 		return nil, err
@@ -57,13 +73,19 @@ func (g *GeoService) AddressSearch(input string) ([]*entity2.Address, error) {
 		if r.Data.City == "" || r.Data.Street == "" {
 			continue
 		}
-		res = append(res, &entity2.Address{City: r.Data.City, Street: r.Data.Street, House: r.Data.House, Lat: r.Data.GeoLat, Lon: r.Data.GeoLon})
+		res = append(res, &entity.Address{City: r.Data.City, Street: r.Data.Street, House: r.Data.House, Lat: r.Data.GeoLat, Lon: r.Data.GeoLon})
 	}
+
+	// register duration
+	reqTimeHist.Observe(time.Since(start).Seconds())
 
 	return res, nil
 }
 
-func (g *GeoService) GeoCode(lat, lng string) ([]*entity2.Address, error) {
+func (g *GeoService) GeoCode(lat, lng string) ([]*entity.Address, error) {
+	// for measuring request duration
+	start := time.Now()
+
 	httpClient := &http.Client{}
 	var data = strings.NewReader(fmt.Sprintf(`{"lat": %s, "lon": %s}`, lat, lng))
 	req, err := http.NewRequest("POST", "https://suggestions.dadata.ru/suggestions/api/4_1/rs/geolocate/address", data)
@@ -73,17 +95,18 @@ func (g *GeoService) GeoCode(lat, lng string) ([]*entity2.Address, error) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Authorization", fmt.Sprintf("Token %s", g.apiKey))
+
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	var geoCode entity2.GeoCode
+	var geoCode entity.GeoCode
 
 	_ = json.NewDecoder(resp.Body).Decode(&geoCode)
 
-	var res []*entity2.Address
+	var res []*entity.Address
 	for _, r := range geoCode.Suggestions {
-		var address entity2.Address
+		var address entity.Address
 		address.City = string(r.Data.City)
 		address.Street = string(r.Data.Street)
 		address.House = r.Data.House
@@ -92,6 +115,9 @@ func (g *GeoService) GeoCode(lat, lng string) ([]*entity2.Address, error) {
 
 		res = append(res, &address)
 	}
+
+	// register duration
+	reqTimeHist.Observe(time.Since(start).Seconds())
 
 	return res, nil
 }

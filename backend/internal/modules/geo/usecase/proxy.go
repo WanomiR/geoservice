@@ -5,8 +5,20 @@ import (
 	"backend/internal/modules/geo/entity"
 	"encoding/json"
 	"github.com/gomodule/redigo/redis"
+	"github.com/prometheus/client_golang/prometheus"
 	"log"
+	"time"
 )
+
+var cacheTimeHist = prometheus.NewHistogram(prometheus.HistogramOpts{
+	Name:    "cache_access_duration_seconds",
+	Help:    "Cached data access duration in seconds",
+	Buckets: []float64{0.001, .005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10},
+})
+
+func init() {
+	prometheus.MustRegister(cacheTimeHist)
+}
 
 //go:generate mockgen -source=./proxy.go -destination=../../../mocks/mock_redis/mock_redis.go
 type RedisPooler interface {
@@ -31,6 +43,9 @@ func NewGeoCacheProxy(geoservice GeoServicer, redisAddress string) *GeoCacheProx
 }
 
 func (p *GeoCacheProxy) AddressSearch(input string) (addresses []*entity.Address, err error) {
+	// for measuring data access duration
+	start := time.Now()
+
 	conn := p.redis.Get()
 	defer conn.Close()
 
@@ -38,6 +53,10 @@ func (p *GeoCacheProxy) AddressSearch(input string) (addresses []*entity.Address
 	if err == nil {
 		err = json.Unmarshal(cachedData, &addresses)
 		log.Println("loaded addresses from cache")
+
+		// register duration
+		cacheTimeHist.Observe(time.Since(start).Seconds())
+
 		return addresses, err
 	}
 
@@ -55,6 +74,9 @@ func (p *GeoCacheProxy) AddressSearch(input string) (addresses []*entity.Address
 }
 
 func (p *GeoCacheProxy) GeoCode(lat, lng string) (addresses []*entity.Address, err error) {
+	// for measuring data access duration
+	start := time.Now()
+
 	conn := p.redis.Get()
 	defer conn.Close()
 
@@ -64,6 +86,10 @@ func (p *GeoCacheProxy) GeoCode(lat, lng string) (addresses []*entity.Address, e
 	if err == nil {
 		err = json.Unmarshal(cachedData, &addresses)
 		log.Println("loaded addresses from cache")
+
+		// register duration
+		cacheTimeHist.Observe(time.Since(start).Seconds())
+
 		return addresses, err
 	}
 

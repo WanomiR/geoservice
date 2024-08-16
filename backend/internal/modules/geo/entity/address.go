@@ -11,5 +11,3 @@ type Address struct {
 type Addresses struct {
 	Addresses []*Address `json:"addresses"`
 }
-
-// TODO: this should go to controller layer

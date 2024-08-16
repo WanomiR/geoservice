@@ -11,6 +11,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/joho/godotenv"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"log"
 	"net/http"
@@ -20,6 +22,15 @@ import (
 	"syscall"
 	"time"
 )
+
+var requestsTotal = prometheus.NewCounter(prometheus.CounterOpts{
+	Name: "total_number_of_requests",
+	Help: "Number of requests received.",
+})
+
+func init() {
+	prometheus.MustRegister(requestsTotal)
+}
 
 type Config struct {
 	host      string
@@ -126,26 +137,40 @@ func (a *App) routes() *chi.Mux {
 
 	r.Use(middleware.Recoverer)
 
-	r.Route("/address", func(r chi.Router) {
-		r.Post("/search", a.controllers.Geo.AddressSearch)
-		r.Post("/geocode", a.controllers.Geo.AddressGeocode)
+	// group for gathering metrics, doesn't include the `metrics` endpoint
+	r.Group(func(r chi.Router) {
+
+		// count number of requests for all endpoints
+		r.Use(func(next http.Handler) http.Handler {
+			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				next.ServeHTTP(w, r)
+				requestsTotal.Inc()
+			})
+		})
+
+		r.Route("/address", func(r chi.Router) {
+			r.Post("/search", a.controllers.Geo.AddressSearch)
+			r.Post("/geocode", a.controllers.Geo.AddressGeocode)
+		})
+
+		r.Route("/auth", func(r chi.Router) {
+			r.Get("/login", a.controllers.Auth.Login)
+			r.Get("/logout", a.controllers.Auth.Logout)
+		})
+
+		r.Route("/debug/pprof/", func(r chi.Router) {
+			r.Use(a.services.Auth.RequireAuthorization)
+
+			r.Get("/", pprof.Index)
+			r.Get("/{cmd}", pprof.Index)
+			r.Get("/cmdline", pprof.Cmdline)
+			r.Get("/profile", pprof.Profile)
+			r.Get("/symbol", pprof.Symbol)
+			r.Get("/trace", pprof.Trace)
+		})
 	})
 
-	r.Route("/auth", func(r chi.Router) {
-		r.Get("/login", a.controllers.Auth.Login)
-		r.Get("/logout", a.controllers.Auth.Logout)
-	})
-
-	r.Route("/debug/pprof/", func(r chi.Router) {
-		r.Use(a.services.Auth.RequireAuthorization)
-
-		r.Get("/", pprof.Index)
-		r.Get("/{cmd}", pprof.Index)
-		r.Get("/cmdline", pprof.Cmdline)
-		r.Get("/profile", pprof.Profile)
-		r.Get("/symbol", pprof.Symbol)
-		r.Get("/trace", pprof.Trace)
-	})
+	r.Get("/metrics", promhttp.Handler().ServeHTTP)
 
 	r.Get("/swagger/*", httpSwagger.Handler(
 		httpSwagger.URL(fmt.Sprintf("http://%s:%s/swagger/doc.json", a.config.host, a.config.port)),
