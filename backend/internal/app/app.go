@@ -13,6 +13,7 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 	"log"
 	"net/http"
+	"net/http/pprof"
 	"os"
 	"os/signal"
 	"syscall"
@@ -81,7 +82,7 @@ func (a *App) init() error {
 		Addr:         ":" + a.config.port,
 		Handler:      a.routes(),
 		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 5 * time.Second,
+		WriteTimeout: 5 * time.Minute, // for profiling
 	}
 
 	a.signalChan = make(chan os.Signal, 1)
@@ -121,6 +122,15 @@ func (a *App) routes() *chi.Mux {
 	r.Route("/address", func(r chi.Router) {
 		r.Post("/search", a.controllers.Geo.AddressSearch)
 		r.Post("/geocode", a.controllers.Geo.AddressGeocode)
+	})
+
+	r.Route("/debug/pprof/", func(r chi.Router) {
+		r.Get("/", pprof.Index)
+		r.Get("/{cmd}", pprof.Index)
+		r.Get("/cmdline", pprof.Cmdline)
+		r.Get("/profile", pprof.Profile)
+		r.Get("/symbol", pprof.Symbol)
+		r.Get("/trace", pprof.Trace)
 	})
 
 	r.Get("/swagger/*", httpSwagger.Handler(

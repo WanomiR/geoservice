@@ -4,6 +4,7 @@ import (
 	_ "backend/docs"
 	"backend/internal/app"
 	"log"
+	_ "net/http/pprof"
 )
 
 // @title GeoService
