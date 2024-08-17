@@ -7,7 +7,26 @@ services:
     depends_on:
       - redis
     restart: always
+    networks:
+      - my-network
 
   redis:
     image: redis:latest
     restart: always
+    networks:
+      - my-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus:/etc/prometheus/
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - '9090:9090'
+    networks:
+      - my-network
+
+
+networks:
+  my-network:
