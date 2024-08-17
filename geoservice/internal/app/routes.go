@@ -14,7 +14,7 @@ import (
 var requestsTotal = prometheus.NewCounterVec(prometheus.CounterOpts{
 	Name: "total_requests_count",
 	Help: "Number of requests received.",
-}, []string{"requests"})
+}, []string{"type"})
 
 func init() {
 	prometheus.MustRegister(requestsTotal)
@@ -32,7 +32,7 @@ func (a *App) routes() *chi.Mux {
 		r.Use(func(next http.Handler) http.Handler {
 			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				next.ServeHTTP(w, r)
-				requestsTotal.WithLabelValues("requests").Inc()
+				requestsTotal.With(prometheus.Labels{"type": "requests"}).Inc()
 			})
 		})
 
