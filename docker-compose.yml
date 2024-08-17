@@ -14,8 +14,6 @@ services:
 
   prometheus:
     image: prom/prometheus:latest
-    ports:
-      - 9090:9090
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
 
@@ -24,11 +22,11 @@ services:
     ports:
       - 3000:3000
     environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=password
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
     volumes:
       - ./grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
-      - grafana:/var/lib/grafana
+      - ./grafana:/var/lib/grafana
 
 volumes:
   grafana:

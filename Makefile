@@ -1,3 +1,5 @@
+include .env
+
 all: swagger_generate build
 
 build:

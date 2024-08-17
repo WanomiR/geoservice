@@ -14,11 +14,11 @@ import (
 	"time"
 )
 
-var reqTimeHist = prometheus.NewHistogram(prometheus.HistogramOpts{
+var reqTimeHist = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 	Name:    "api_request_duration_seconds",
 	Help:    "API request duration in seconds",
 	Buckets: []float64{0.001, .005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10},
-})
+}, []string{"status", "method"})
 
 func init() {
 	prometheus.MustRegister(reqTimeHist)
@@ -77,7 +77,7 @@ func (g *GeoService) AddressSearch(input string) ([]*entity.Address, error) {
 	}
 
 	// register duration
-	reqTimeHist.Observe(time.Since(start).Seconds())
+	reqTimeHist.With(prometheus.Labels{"method": "POST", "status": "200"}).Observe(time.Since(start).Seconds())
 
 	return res, nil
 }
@@ -117,7 +117,7 @@ func (g *GeoService) GeoCode(lat, lng string) ([]*entity.Address, error) {
 	}
 
 	// register duration
-	reqTimeHist.Observe(time.Since(start).Seconds())
+	reqTimeHist.With(prometheus.Labels{"method": "POST", "status": "200"}).Observe(time.Since(start).Seconds())
 
 	return res, nil
 }
