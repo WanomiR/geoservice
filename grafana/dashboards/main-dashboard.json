@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 2,
+  "id": 1,
   "links": [],
   "panels": [
     {
@@ -394,8 +394,8 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "Geoservice Dashboard Copy",
-  "uid": "fdv3a27mqedxce",
-  "version": 1,
+  "title": "Geoservice Dashboard",
+  "uid": "cdv33kvgx2w3ka",
+  "version": 6,
   "weekStart": ""
 }
