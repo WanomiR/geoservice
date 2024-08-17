@@ -1,9 +1,11 @@
 global:
-  scrape_interval:     15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  scrape_interval: 15s
+
+alerting:
+
+rule_files:
 
 scrape_configs:
-  - job_name: prometheus
-    scrape_interval: 5s
-    metrics_path: '/metrics'
+  - job_name: geoservice
     static_configs:
       - targets: ['geoservice:8888']
