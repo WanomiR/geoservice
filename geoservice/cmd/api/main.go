@@ -1,0 +1,29 @@
+package main
+
+import (
+	_ "geoservice/docs"
+	"geoservice/internal/app"
+	"log"
+	_ "net/http/pprof"
+)
+
+// @title GeoService
+// @version 1.0.0
+// @description Geoservice API
+
+// @host localhost:8888
+// @basePath /
+
+// @securityDefinitions.apiKey ApiKeyAuth
+// @in header
+// @name Authorization
+func main() {
+	a, err := app.NewApp()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	go a.Start()
+
+	a.Shutdown()
+}

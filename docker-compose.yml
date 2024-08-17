@@ -1,7 +1,7 @@
 services:
-  backend:
+  geoservice:
     build:
-      ./backend
+      ./geoservice
     ports:
       - '8888:8888'
     depends_on:
@@ -24,6 +24,13 @@ services:
       - '--config.file=/etc/prometheus/prometheus.yml'
     ports:
       - '9090:9090'
+    networks:
+      - my-network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - '3000:3000'
     networks:
       - my-network
 
