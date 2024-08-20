@@ -1,6 +1,20 @@
 # geoservice
 Case study project for GoKata Academy
 
+## Metrics
+### Number of requests
+```bash
+curl localhost:8888/metrics | grep 'total_number_of_requests'
+```
+### Request duration histogram
+```bash
+curl localhost:8888/metrics | grep 'api_request_duration_seconds'
+```
+### Cached data access duration
+```bash
+curl localhost:8888/metrics | grep 'cache_access_duration_seconds'
+```
+	
 ## Profiling
 Ресурс url для получения данных по профилированию: `/<my-path>/pprof`
 
@@ -19,7 +33,7 @@ Count	Profile
 full goroutine stack dump /mycustompath/debug/pprof/goroutine
 ```
 
-## Analysis
+## Performance Analysis
 При активной нагрузке (в виде множества заппросов на один эндпонит в течение нескольких секунд) узких мест не обнаружено. Бóльшая часть процессорного времени пришлась на вызовы системы (66.6%), остальные процессы распределены равномерно.
 
 ## Profiling Command
