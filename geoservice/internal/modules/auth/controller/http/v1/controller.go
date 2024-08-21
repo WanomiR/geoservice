@@ -1,9 +1,9 @@
 package v1
 
 import (
-	"geoservice/internal/lib/e"
 	"geoservice/internal/lib/rr"
 	"geoservice/internal/modules/auth/usecase"
+	"github.com/wanomir/e"
 	"net/http"
 )
 

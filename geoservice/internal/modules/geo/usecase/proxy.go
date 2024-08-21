@@ -2,10 +2,10 @@ package usecase
 
 import (
 	"encoding/json"
-	"geoservice/internal/lib/e"
 	"geoservice/internal/modules/geo/entity"
 	"github.com/gomodule/redigo/redis"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/wanomir/e"
 	"log"
 	"time"
 )

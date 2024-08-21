@@ -2,9 +2,9 @@ package usecase
 
 import (
 	"errors"
-	"geoservice/internal/lib/e"
 	"geoservice/internal/modules/auth/entity"
 	"geoservice/internal/modules/auth/infrastructure/repository"
+	"github.com/wanomir/e"
 	"log"
 	"net/http"
 )
