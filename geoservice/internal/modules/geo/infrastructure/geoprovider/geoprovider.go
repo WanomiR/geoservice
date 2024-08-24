@@ -21,18 +21,22 @@ func NewProvider(host, port, serviceName string) (*Provider, error) {
 }
 
 func (p *Provider) AddressSearch(input string) ([]entity.Address, error) {
+	calling := p.serviceName + ".AddressSearch"
 	var addresses entity.Addresses
-	if err := p.client.Call(p.serviceName+".AddressSearch", input, &addresses); err != nil {
-		return nil, e.Wrap("error calling "+p.serviceName+".AddressSearch", err)
+
+	if err := p.client.Call(calling, input, &addresses); err != nil {
+		return nil, e.Wrap("error calling "+calling, err)
 	}
 
 	return addresses.Addresses, nil
 }
 
 func (p *Provider) GeoCode(lat, lng string) ([]entity.Address, error) {
+	calling := p.serviceName + ".GeoCode"
 	var addresses entity.Addresses
-	if err := p.client.Call(p.serviceName+".GeoCode", []string{lat, lng}, &addresses); err != nil {
-		return nil, e.Wrap("error calling "+p.serviceName+".Geocode", err)
+
+	if err := p.client.Call(calling, []string{lat, lng}, &addresses); err != nil {
+		return nil, e.Wrap("error calling "+calling, err)
 	}
 
 	return addresses.Addresses, nil

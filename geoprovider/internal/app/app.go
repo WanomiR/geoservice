@@ -38,7 +38,6 @@ type App struct {
 	config     Config
 	server     *rpc.Server
 	signalChan chan os.Signal
-	controller *cntrl.GeoController
 }
 
 func NewApp() (*App, error) {
@@ -88,12 +87,11 @@ func (a *App) init() error {
 		usecase.NewGeoService(a.config.apiKey, a.config.secretKey),
 		fmt.Sprintf("%s:%s", a.config.redisHost, a.config.redisPort),
 	)
-
-	a.controller = cntrl.NewController(service)
+	controller := cntrl.NewController(service)
 
 	a.server = rpc.NewServer()
-	if err := a.server.RegisterName("GeoProvider", a.controller); err != nil {
-		return e.Wrap("error registering rpc GeoProvider", err)
+	if err := a.server.RegisterName(a.config.serviceName, controller); err != nil {
+		return e.Wrap("error registering "+a.config.serviceName, err)
 	}
 
 	a.signalChan = make(chan os.Signal, 1)
