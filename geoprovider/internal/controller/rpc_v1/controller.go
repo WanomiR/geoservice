@@ -1,9 +1,7 @@
 package rpc_v1
 
 import (
-	"context"
 	"geoprovider/internal/entity"
-	rpc_v1 "geoprovider/pkg/geoprovider_rpc_v1"
 	"github.com/wanomir/e"
 )
 
@@ -12,59 +10,34 @@ type GeoProvider interface {
 	GeoCode(lat, lng string) ([]entity.Address, error)
 }
 
-type Controller struct {
-	rpc_v1.UnimplementedGeoProviderV1Server // safety fallback for non-implemented controllers
-	service                                 GeoProvider
+type GeoController struct {
+	service GeoProvider
 }
 
-func NewController(service GeoProvider) *Controller {
-	return &Controller{service: service}
+func NewController(service GeoProvider) *GeoController {
+	return &GeoController{service: service}
 }
 
-func (c *Controller) AddressSearch(_ context.Context, in *rpc_v1.AddressRequest) (*rpc_v1.AddressesResponse, error) {
-	addresses, err := c.service.AddressSearch(in.GetQuery())
+func (c *GeoController) AddressSearch(input string, reply *entity.Addresses) error {
+	addresses, err := c.service.AddressSearch(input)
 	if err != nil {
-		return nil, e.Wrap("error fetching addresses", err)
+		return e.Wrap("error fetching addresses", err)
 	}
 
-	response := &rpc_v1.AddressesResponse{
-		Addresses: make([]*rpc_v1.AddressResponse, 0),
+	*reply = entity.Addresses{
+		Addresses: addresses,
 	}
-
-	for _, a := range addresses {
-		addressResponse := &rpc_v1.AddressResponse{
-			City:   a.City,
-			Street: a.Street,
-			House:  a.House,
-			Lat:    a.Lat,
-			Lon:    a.Lon,
-		}
-		response.Addresses = append(response.Addresses, addressResponse)
-	}
-
-	return response, nil
+	return nil
 }
 
-func (c *Controller) GeoCode(_ context.Context, in *rpc_v1.GeoRequest) (*rpc_v1.AddressesResponse, error) {
-	addresses, err := c.service.GeoCode(in.GetLat(), in.GetLng())
+func (c *GeoController) GeoCode(args []string, reply *entity.Addresses) error {
+	addresses, err := c.service.GeoCode(args[0], args[1])
 	if err != nil {
-		return nil, e.Wrap("error fetching addresses", err)
+		return e.Wrap("error fetching addresses", err)
 	}
 
-	response := &rpc_v1.AddressesResponse{
-		Addresses: make([]*rpc_v1.AddressResponse, 0),
+	*reply = entity.Addresses{
+		Addresses: addresses,
 	}
-
-	for _, a := range addresses {
-		addressResponse := &rpc_v1.AddressResponse{
-			City:   a.City,
-			Street: a.Street,
-			House:  a.House,
-			Lat:    a.Lat,
-			Lon:    a.Lon,
-		}
-		response.Addresses = append(response.Addresses, addressResponse)
-	}
-
-	return response, nil
+	return nil
 }

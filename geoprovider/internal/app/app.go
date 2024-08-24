@@ -6,13 +6,11 @@ import (
 	"fmt"
 	cntrl "geoprovider/internal/controller/rpc_v1"
 	"geoprovider/internal/usecase"
-	rpc_v1 "geoprovider/pkg/geoprovider_rpc_v1"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/wanomir/e"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 	"log"
 	"net"
+	"net/rpc"
 	"os"
 	"os/signal"
 	"syscall"
@@ -26,20 +24,21 @@ var appInfo = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 }, []string{"version"})
 
 type Config struct {
-	host       string
-	port       string
-	apiKey     string
-	secretKey  string
-	redisHost  string
-	redisPort  string
-	appVersion string
+	host        string
+	port        string
+	serviceName string
+	apiKey      string
+	secretKey   string
+	redisHost   string
+	redisPort   string
+	appVersion  string
 }
 
 type App struct {
 	config     Config
-	server     *grpc.Server
+	server     *rpc.Server
 	signalChan chan os.Signal
-	controller *cntrl.Controller
+	controller *cntrl.GeoController
 }
 
 func NewApp() (*App, error) {
@@ -53,16 +52,16 @@ func NewApp() (*App, error) {
 }
 
 func (a *App) Start() {
-	//listener, err := net.Listen("tcp", a.config.host+":"+a.config.port)
 	listener, err := net.Listen("tcp", ":"+a.config.port)
 	if err != nil {
 		log.Fatal(e.Wrap("failed to listen", err))
 	}
 
-	fmt.Println("Started grpc server on port", a.config.port)
-	if err = a.server.Serve(listener); err != nil && !errors.Is(err, grpc.ErrServerStopped) {
-		log.Fatal(err)
+	fmt.Println("Started rpc server on port", a.config.port)
+	for {
+		a.server.Accept(listener)
 	}
+
 }
 
 func (a *App) Shutdown() {
@@ -92,9 +91,10 @@ func (a *App) init() error {
 
 	a.controller = cntrl.NewController(service)
 
-	a.server = grpc.NewServer()
-	reflection.Register(a.server)
-	rpc_v1.RegisterGeoProviderV1Server(a.server, a.controller)
+	a.server = rpc.NewServer()
+	if err := a.server.RegisterName("GeoProvider", a.controller); err != nil {
+		return e.Wrap("error registering rpc GeoProvider", err)
+	}
 
 	a.signalChan = make(chan os.Signal, 1)
 	signal.Notify(a.signalChan, syscall.SIGINT, syscall.SIGTERM)
@@ -106,13 +106,14 @@ func (a *App) init() error {
 
 func (a *App) readConfig() error {
 	a.config = Config{
-		host:       os.Getenv("HOST"),
-		port:       os.Getenv("PORT"),
-		apiKey:     os.Getenv("DADATA_API_KEY"),
-		secretKey:  os.Getenv("DADATA_SECRET_KEY"),
-		redisHost:  os.Getenv("REDIS_HOST"),
-		redisPort:  os.Getenv("REDIS_PORT"),
-		appVersion: os.Getenv("APP_VERSION"),
+		host:        os.Getenv("HOST"),
+		port:        os.Getenv("PORT"),
+		serviceName: os.Getenv("SERVICE_NAME"),
+		apiKey:      os.Getenv("DADATA_API_KEY"),
+		secretKey:   os.Getenv("DADATA_SECRET_KEY"),
+		redisHost:   os.Getenv("REDIS_HOST"),
+		redisPort:   os.Getenv("REDIS_PORT"),
+		appVersion:  os.Getenv("APP_VERSION"),
 	}
 
 	if a.config.host == "" || a.config.port == "" || a.config.apiKey == "" {

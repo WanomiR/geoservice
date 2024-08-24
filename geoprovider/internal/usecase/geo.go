@@ -41,9 +41,7 @@ func NewGeoService(apiKey, secretKey string) *GeoService {
 }
 
 func (g *GeoService) AddressSearch(input string) ([]entity.Address, error) {
-	// for measuring request duration
 	var res []entity.Address
-
 	rawRes, err := g.api.Address(context.Background(), &suggest.RequestParams{Query: input})
 	if err != nil {
 		return nil, err

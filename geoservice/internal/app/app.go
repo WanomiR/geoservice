@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"geoservice/internal/modules"
 	usecaseAuth "geoservice/internal/modules/auth/usecase"
-	"geoservice/internal/modules/geo/infrastructure/geoprovider/provider"
+	"geoservice/internal/modules/geo/infrastructure/geoprovider"
 	"geoservice/internal/modules/geo/usecase"
 	"github.com/prometheus/client_golang/prometheus"
 	"log"
@@ -29,6 +29,7 @@ type Config struct {
 	jwtSecret    string
 	providerHost string
 	providerPort string
+	providerName string
 	appVersion   string
 }
 
@@ -77,7 +78,10 @@ func (a *App) init() (err error) {
 		return err
 	}
 
-	geoProvider := provider.NewProvider(a.config.providerHost, a.config.providerPort)
+	geoProvider, err := geoprovider.NewProvider(a.config.providerHost, a.config.providerPort, a.config.providerName)
+	if err != nil {
+		return err
+	}
 	geoService := usecase.NewGeoService(geoProvider)
 
 	authService := usecaseAuth.NewAuthService(
@@ -109,6 +113,7 @@ func (a *App) readConfig() error {
 		jwtSecret:    os.Getenv("JWT_SECRET"),
 		providerHost: os.Getenv("GEOPROVIDER_HOST"),
 		providerPort: os.Getenv("GEOPROVIDER_PORT"),
+		providerName: os.Getenv("GEOPROVIDER_NAME"),
 		appVersion:   os.Getenv("APP_VERSION"),
 	}
 

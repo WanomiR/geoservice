@@ -9,5 +9,5 @@ type Address struct {
 }
 
 type Addresses struct {
-	Addresses []*Address `json:"addresses"`
+	Addresses []Address `json:"addresses"`
 }

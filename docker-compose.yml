@@ -14,6 +14,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       GEOPROVIDER_HOST: geoprovider
       GEOPROVIDER_PORT: 7777
+      GEOPROVIDER_NAME: GeoProvider
 
   geoprovider:
     build:
@@ -25,6 +26,7 @@ services:
       APP_VERSION: 1.0.0
       HOST: geoprovider
       PORT: 7777
+      SERVICE_NAME: GeoProvider
       DADATA_API_KEY: ${DADATA_API_KEY}
       DADATA_SECRET_KEY: ${DADATA_SECRET_KEY}
       REDIS_HOST: redis
@@ -40,18 +42,18 @@ services:
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
 
-#  grafana:
-#    image: grafana/grafana:latest
-#    ports:
-#      - 3000:3000
-#    environment:
-#      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER}
-#      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
-#    volumes:
-#      - ./grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
-#      - ./grafana/dashboard.yaml:/etc/grafana/provisioning/dashboards/main.yaml
-#      - ./grafana/dashboards:/etc/dashboards
-#      - ./grafana:/var/lib/grafana
-#
-#volumes:
-#  grafana:
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - 3000:3000
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+    volumes:
+      - ./grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ./grafana/dashboard.yaml:/etc/grafana/provisioning/dashboards/main.yaml
+      - ./grafana/dashboards:/etc/dashboards
+      - ./grafana:/var/lib/grafana
+
+volumes:
+  grafana:
