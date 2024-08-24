@@ -6,7 +6,7 @@ import (
 	"fmt"
 	cntrl "geoprovider/internal/controller/rpc_v1"
 	"geoprovider/internal/usecase"
-	"geoprovider/pkg/rpc_v1"
+	rpc_v1 "geoprovider/pkg/geoprovider_rpc_v1"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/wanomir/e"
 	"google.golang.org/grpc"

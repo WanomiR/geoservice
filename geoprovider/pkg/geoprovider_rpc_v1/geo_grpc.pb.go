@@ -7,7 +7,7 @@
 // - protoc             v5.27.1
 // source: geo.proto
 
-package rpc_v1
+package geoprovider_rpc_v1
 
 import (
 	context "context"
@@ -22,8 +22,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	GeoProviderV1_AddressSearch_FullMethodName = "/rpc_v1.GeoProviderV1/AddressSearch"
-	GeoProviderV1_GeoCode_FullMethodName       = "/rpc_v1.GeoProviderV1/GeoCode"
+	GeoProviderV1_AddressSearch_FullMethodName = "/geoprovider_rpc_v1.GeoProviderV1/AddressSearch"
+	GeoProviderV1_GeoCode_FullMethodName       = "/geoprovider_rpc_v1.GeoProviderV1/GeoCode"
 )
 
 // GeoProviderV1Client is the client API for GeoProviderV1 service.
@@ -145,7 +145,7 @@ func _GeoProviderV1_GeoCode_Handler(srv interface{}, ctx context.Context, dec fu
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var GeoProviderV1_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "rpc_v1.GeoProviderV1",
+	ServiceName: "geoprovider_rpc_v1.GeoProviderV1",
 	HandlerType: (*GeoProviderV1Server)(nil),
 	Methods: []grpc.MethodDesc{
 		{

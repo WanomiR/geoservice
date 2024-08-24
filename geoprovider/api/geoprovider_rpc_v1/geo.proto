@@ -2,9 +2,9 @@
 // for implementation in specific language
 syntax = "proto3";
 
-package rpc_v1;
+package geoprovider_rpc_v1;
 
-option  go_package = "geoprovider/geoprovider/pkg/rpc_v1;rpc_v1";
+option  go_package = "geoprovider/pkg/geoprovider_rpc_v1;geoprovider_rpc_v1";
 
 service GeoProviderV1 {
   rpc AddressSearch(AddressRequest) returns (AddressesResponse);

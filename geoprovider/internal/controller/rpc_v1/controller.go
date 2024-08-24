@@ -3,7 +3,7 @@ package rpc_v1
 import (
 	"context"
 	"geoprovider/internal/entity"
-	"geoprovider/pkg/rpc_v1"
+	rpc_v1 "geoprovider/pkg/geoprovider_rpc_v1"
 	"github.com/wanomir/e"
 )
 
