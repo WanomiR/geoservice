@@ -54,12 +54,12 @@ func NewApp() (*App, error) {
 
 func (a *App) Start() {
 	//listener, err := net.Listen("tcp", a.config.host+":"+a.config.port)
-	listener, err := net.Listen("tcp", "0.0.0.0:"+a.config.port)
+	listener, err := net.Listen("tcp", ":"+a.config.port)
 	if err != nil {
 		log.Fatal(e.Wrap("failed to listen", err))
 	}
 
-	fmt.Println("Started grpc server on port", listener.Addr())
+	fmt.Println("Started grpc server on port", a.config.port)
 	if err = a.server.Serve(listener); err != nil && !errors.Is(err, grpc.ErrServerStopped) {
 		log.Fatal(err)
 	}

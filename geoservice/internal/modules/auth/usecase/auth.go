@@ -14,13 +14,6 @@ type DatabaseRepo interface {
 	InsertUser(user entity.User) error
 }
 
-type AuthServicer interface {
-	Register(user entity.User) error
-	Authorize(email string, password string) (string, *http.Cookie, error)
-	ResetCookie() *http.Cookie
-	RequireAuthorization(next http.Handler) http.Handler
-}
-
 type AuthService struct {
 	auth *entity.Auth
 	db   DatabaseRepo

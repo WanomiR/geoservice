@@ -3,17 +3,16 @@ module geoservice
 go 1.23.0
 
 require (
-	github.com/ekomobile/dadata/v2 v2.14.0
 	github.com/go-chi/chi/v5 v5.1.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
-	github.com/golang/mock v1.6.0
-	github.com/gomodule/redigo v1.9.2
-	github.com/joho/godotenv v1.5.1
 	github.com/prometheus/client_golang v1.20.0
-	github.com/rafaeljusto/redigomock v2.4.0+incompatible
 	github.com/swaggo/http-swagger v1.3.4
 	github.com/swaggo/swag v1.16.3
+	github.com/wanomir/e v1.0.0
+	github.com/wanomir/rr v1.0.5
 	golang.org/x/crypto v0.26.0
+	google.golang.org/grpc v1.65.0
+	google.golang.org/protobuf v1.34.2
 )
 
 require (
@@ -32,11 +31,10 @@ require (
 	github.com/prometheus/common v0.55.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe // indirect
-	github.com/wanomir/e v1.0.0 // indirect
-	github.com/wanomir/rr v1.0.5 // indirect
 	golang.org/x/net v0.26.0 // indirect
 	golang.org/x/sys v0.23.0 // indirect
-	golang.org/x/tools v0.7.0 // indirect
-	google.golang.org/protobuf v1.34.2 // indirect
+	golang.org/x/text v0.17.0 // indirect
+	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240528184218-531527333157 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

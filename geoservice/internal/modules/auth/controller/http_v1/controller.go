@@ -1,23 +1,25 @@
 package http_v1
 
 import (
-	"geoservice/internal/modules/auth/usecase"
+	eauth "geoservice/internal/modules/auth/entity"
 	"github.com/wanomir/e"
 	"github.com/wanomir/rr"
 	"net/http"
 )
 
-type Controller interface {
-	Login(w http.ResponseWriter, r *http.Request)
-	Logout(w http.ResponseWriter, r *http.Request)
+type Auther interface {
+	Register(user eauth.User) error
+	Authorize(email string, password string) (string, *http.Cookie, error)
+	ResetCookie() *http.Cookie
+	RequireAuthorization(next http.Handler) http.Handler
 }
 
 type AuthController struct {
-	authService usecase.AuthServicer
+	authService Auther
 	rr          *rr.ReadResponder
 }
 
-func NewAuthController(authService usecase.AuthServicer, readResponder *rr.ReadResponder) *AuthController {
+func NewAuthController(authService Auther, readResponder *rr.ReadResponder) *AuthController {
 	return &AuthController{
 		authService: authService,
 		rr:          readResponder,

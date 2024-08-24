@@ -3,23 +3,17 @@ package http_v1
 import (
 	"errors"
 	"geoservice/internal/modules/geo/entity"
-	"geoservice/internal/modules/geo/usecase"
 	"github.com/wanomir/rr"
 	"net/http"
 )
 
-type Controller interface {
-	AddressSearch(w http.ResponseWriter, r *http.Request)
-	AddressGeocode(w http.ResponseWriter, r *http.Request)
-}
-
 type GeoServicer interface {
-	AddressSearch(input string) ([]*entity.Address, error)
-	GeoCode(lat, lng string) ([]*entity.Address, error)
+	AddressSearch(input string) ([]entity.Address, error)
+	GeoCode(lat, lng string) ([]entity.Address, error)
 }
 
 type GeoController struct {
-	geoService usecase.GeoServicer
+	geoService GeoServicer
 	rr         *rr.ReadResponder
 }
 
@@ -32,7 +26,7 @@ type AddressGeocode struct {
 	Lng string `json:"lng" example:"37.642589" binding:"required"`
 }
 
-func NewGeoController(geoService usecase.GeoServicer, responder *rr.ReadResponder) *GeoController {
+func NewGeoController(geoService GeoServicer, responder *rr.ReadResponder) *GeoController {
 	return &GeoController{geoService: geoService, rr: responder}
 }
 

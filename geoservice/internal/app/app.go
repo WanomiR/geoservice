@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"geoservice/internal/modules"
 	usecaseAuth "geoservice/internal/modules/auth/usecase"
+	"geoservice/internal/modules/geo/infrastructure/geoprovider/provider"
 	"geoservice/internal/modules/geo/usecase"
 	"github.com/prometheus/client_golang/prometheus"
 	"log"
@@ -23,14 +24,12 @@ var appInfo = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 }, []string{"version"})
 
 type Config struct {
-	host       string
-	port       string
-	jwtSecret  string
-	redisHost  string
-	redisPort  string
-	apiKey     string
-	secretKey  string
-	appVersion string
+	host         string
+	port         string
+	jwtSecret    string
+	providerHost string
+	providerPort string
+	appVersion   string
 }
 
 type App struct {
@@ -73,15 +72,13 @@ func (a *App) Shutdown() {
 	fmt.Println("Shutting down server gracefully")
 }
 
-func (a *App) init() error {
-	if err := a.readConfig(); err != nil {
+func (a *App) init() (err error) {
+	if err = a.readConfig(); err != nil {
 		return err
 	}
 
-	geoService := usecase.NewGeoCacheProxy(
-		usecase.NewGeoService(a.config.apiKey, a.config.secretKey),
-		fmt.Sprintf("%s:%s", a.config.redisHost, a.config.redisPort),
-	)
+	geoProvider := provider.NewProvider(a.config.providerHost, a.config.providerPort)
+	geoService := usecase.NewGeoService(geoProvider)
 
 	authService := usecaseAuth.NewAuthService(
 		a.config.host, a.config.host, a.config.jwtSecret, a.config.host,
@@ -107,17 +104,15 @@ func (a *App) init() error {
 
 func (a *App) readConfig() error {
 	a.config = Config{
-		host:       os.Getenv("HOST"),
-		port:       os.Getenv("PORT"),
-		jwtSecret:  os.Getenv("JWT_SECRET"),
-		redisHost:  os.Getenv("REDIS_HOST"),
-		redisPort:  os.Getenv("REDIS_PORT"),
-		apiKey:     os.Getenv("DADATA_API_KEY"),
-		secretKey:  os.Getenv("DADATA_SECRET_KEY"),
-		appVersion: os.Getenv("APP_VERSION"),
+		host:         os.Getenv("HOST"),
+		port:         os.Getenv("PORT"),
+		jwtSecret:    os.Getenv("JWT_SECRET"),
+		providerHost: os.Getenv("GEOPROVIDER_HOST"),
+		providerPort: os.Getenv("GEOPROVIDER_PORT"),
+		appVersion:   os.Getenv("APP_VERSION"),
 	}
 
-	if a.config.host == "" || a.config.port == "" || a.config.jwtSecret == "" {
+	if a.config.host == "" || a.config.port == "" || a.config.jwtSecret == "" || a.config.providerHost == "" || a.config.providerPort == "" {
 		return errors.New("env variables not set")
 	}
 
