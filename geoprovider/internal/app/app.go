@@ -4,12 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"geoservice/internal/modules"
-	usecaseAuth "geoservice/internal/modules/auth/usecase"
-	"geoservice/internal/modules/geo/usecase"
+	cntrl "geoprovider/internal/controller/rpc_v1"
+	"geoprovider/internal/usecase"
+	"geoprovider/pkg/rpc_v1"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/wanomir/e"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 	"log"
-	"net/http"
+	"net"
 	"os"
 	"os/signal"
 	"syscall"
@@ -17,7 +20,7 @@ import (
 )
 
 var appInfo = prometheus.NewGaugeVec(prometheus.GaugeOpts{
-	Namespace: "geoservice",
+	Namespace: "geoprovider",
 	Name:      "info",
 	Help:      "App environment info",
 }, []string{"version"})
@@ -25,24 +28,18 @@ var appInfo = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 type Config struct {
 	host       string
 	port       string
-	jwtSecret  string
-	redisHost  string
-	redisPort  string
 	apiKey     string
 	secretKey  string
+	redisHost  string
+	redisPort  string
 	appVersion string
 }
 
 type App struct {
-	config      Config
-	server      *http.Server
-	signalChan  chan os.Signal
-	services    *modules.Services
-	controllers *modules.Controllers
-}
-
-func init() {
-	prometheus.MustRegister(appInfo)
+	config     Config
+	server     *grpc.Server
+	signalChan chan os.Signal
+	controller *cntrl.Controller
 }
 
 func NewApp() (*App, error) {
@@ -56,8 +53,14 @@ func NewApp() (*App, error) {
 }
 
 func (a *App) Start() {
-	fmt.Println("Started http server on port", a.config.port)
-	if err := a.server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+	//listener, err := net.Listen("tcp", a.config.host+":"+a.config.port)
+	listener, err := net.Listen("tcp", "0.0.0.0:"+a.config.port)
+	if err != nil {
+		log.Fatal(e.Wrap("failed to listen", err))
+	}
+
+	fmt.Println("Started grpc server on port", listener.Addr())
+	if err = a.server.Serve(listener); err != nil && !errors.Is(err, grpc.ErrServerStopped) {
 		log.Fatal(err)
 	}
 }
@@ -73,29 +76,25 @@ func (a *App) Shutdown() {
 	fmt.Println("Shutting down server gracefully")
 }
 
+func (a *App) ServeMetrics() {
+	panic("not implemented")
+}
+
 func (a *App) init() error {
 	if err := a.readConfig(); err != nil {
 		return err
 	}
 
-	geoService := usecase.NewGeoCacheProxy(
+	service := usecase.NewGeoCacheProxy(
 		usecase.NewGeoService(a.config.apiKey, a.config.secretKey),
 		fmt.Sprintf("%s:%s", a.config.redisHost, a.config.redisPort),
 	)
 
-	authService := usecaseAuth.NewAuthService(
-		a.config.host, a.config.host, a.config.jwtSecret, a.config.host,
-	)
+	a.controller = cntrl.NewController(service)
 
-	a.services = modules.NewServices(geoService, authService)
-	a.controllers = modules.NewControllers(a.services)
-
-	a.server = &http.Server{
-		Addr:         ":" + a.config.port,
-		Handler:      a.routes(),
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 60 * time.Second, // for profiling
-	}
+	a.server = grpc.NewServer()
+	reflection.Register(a.server)
+	rpc_v1.RegisterGeoProviderV1Server(a.server, a.controller)
 
 	a.signalChan = make(chan os.Signal, 1)
 	signal.Notify(a.signalChan, syscall.SIGINT, syscall.SIGTERM)
@@ -109,15 +108,14 @@ func (a *App) readConfig() error {
 	a.config = Config{
 		host:       os.Getenv("HOST"),
 		port:       os.Getenv("PORT"),
-		jwtSecret:  os.Getenv("JWT_SECRET"),
-		redisHost:  os.Getenv("REDIS_HOST"),
-		redisPort:  os.Getenv("REDIS_PORT"),
 		apiKey:     os.Getenv("DADATA_API_KEY"),
 		secretKey:  os.Getenv("DADATA_SECRET_KEY"),
+		redisHost:  os.Getenv("REDIS_HOST"),
+		redisPort:  os.Getenv("REDIS_PORT"),
 		appVersion: os.Getenv("APP_VERSION"),
 	}
 
-	if a.config.host == "" || a.config.port == "" || a.config.jwtSecret == "" {
+	if a.config.host == "" || a.config.port == "" || a.config.apiKey == "" {
 		return errors.New("env variables not set")
 	}
 

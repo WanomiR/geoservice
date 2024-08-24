@@ -1,8 +1,8 @@
 package modules
 
 import (
-	auth "geoservice/internal/modules/auth/controller/http/v1"
-	geo "geoservice/internal/modules/geo/controller/http/v1"
+	auth "geoservice/internal/modules/auth/controller/http_v1"
+	geo "geoservice/internal/modules/geo/controller/http_v1"
 	"github.com/wanomir/rr"
 )
 

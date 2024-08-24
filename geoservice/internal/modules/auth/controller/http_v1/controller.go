@@ -1,4 +1,4 @@
-package v1
+package http_v1
 
 import (
 	"geoservice/internal/modules/auth/usecase"

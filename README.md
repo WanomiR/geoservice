@@ -62,6 +62,6 @@ Alternatively:
 
 ```bash
 curl --output profile "http://localhost:8888/debug/pprof/profile?seconds=30"
-go tool pprof -http localhost:3435 profile
+go tool pprof -http_v1 localhost:3435 profile
 ```
 

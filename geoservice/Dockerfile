@@ -1,4 +1,4 @@
-FROM golang:1.22-alpine AS builder
+FROM golang:1.23-alpine AS builder
 
 WORKDIR /app
 
@@ -12,7 +12,6 @@ RUN go build -o main ./cmd/api
 FROM alpine:latest
 
 COPY --from=builder /app/main /main
-COPY --from=builder /app/.env /.env
 COPY --from=builder /app/docs /docs
 
 EXPOSE 8888

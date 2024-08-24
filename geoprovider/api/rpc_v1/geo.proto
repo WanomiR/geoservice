@@ -1,0 +1,33 @@
+// rpc contract declaration, used to generate code
+// for implementation in specific language
+syntax = "proto3";
+
+package rpc_v1;
+
+option  go_package = "geoprovider/geoprovider/pkg/rpc_v1;rpc_v1";
+
+service GeoProviderV1 {
+  rpc AddressSearch(AddressRequest) returns (AddressesResponse);
+  rpc GeoCode(GeoRequest) returns (AddressesResponse);
+}
+
+message AddressRequest {
+  string query = 1;
+}
+
+message GeoRequest {
+  string lat = 1;
+  string lng = 2;
+}
+
+message AddressResponse {
+  string city = 1;
+  string street = 2;
+  string house = 3;
+  string lat = 4;
+  string lon = 5;
+}
+
+message AddressesResponse {
+  repeated AddressResponse addresses = 1;
+}

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	_ "geoservice/docs"
 	"geoservice/internal/app"
-	v1 "geoservice/internal/modules/geo/controller/http/v1"
+	v1 "geoservice/internal/modules/geo/controller/http_v1"
 	"log"
 	"math/rand"
 	"net/http"
@@ -31,7 +31,7 @@ func main() {
 
 	go a.Start()
 
-	go simulateLoad()
+	//go simulateLoad()
 
 	a.Shutdown()
 }

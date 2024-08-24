@@ -5,17 +5,32 @@ services:
     ports:
       - 8888:8888
     depends_on:
+      - geoprovider
+    restart: always
+    environment:
+      APP_VERSION: 1.0.0
+      HOST: localhost
+      PORT: 8888
+      JWT_SECRET: ${JWT_SECRET}
+      GEOPROVIDER_HOST: geoprovider
+      GEOPROVIDER_PORT: 7777
+
+  geoprovider:
+    build:
+      ./geoprovider
+    ports:
+      - 7777:7777
+    depends_on:
       - redis
     restart: always
     environment:
-      APP_VERSION: ${APP_VERSION}
-      HOST: ${HOST}
-      PORT: ${PORT}
-      JWT_SECRET: ${JWT_SECRET}
-      REDIS_HOST: ${REDIS_HOST}
-      REDIS_PORT: ${REDIS_PORT}
+      APP_VERSION: 1.0.0
+      HOST: geoprovider
+      PORT: 7777
       DADATA_API_KEY: ${DADATA_API_KEY}
       DADATA_SECRET_KEY: ${DADATA_SECRET_KEY}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
 
 
   redis:

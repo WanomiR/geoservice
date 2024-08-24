@@ -1,7 +1,8 @@
-package v1
+package http_v1
 
 import (
 	"errors"
+	"geoservice/internal/modules/geo/entity"
 	"geoservice/internal/modules/geo/usecase"
 	"github.com/wanomir/rr"
 	"net/http"
@@ -10,6 +11,11 @@ import (
 type Controller interface {
 	AddressSearch(w http.ResponseWriter, r *http.Request)
 	AddressGeocode(w http.ResponseWriter, r *http.Request)
+}
+
+type GeoServicer interface {
+	AddressSearch(input string) ([]*entity.Address, error)
+	GeoCode(lat, lng string) ([]*entity.Address, error)
 }
 
 type GeoController struct {
