@@ -17,8 +17,10 @@ import (
 	"time"
 )
 
+var prometheusNamespace = "geoservice"
+
 var appInfo = prometheus.NewGaugeVec(prometheus.GaugeOpts{
-	Namespace: "geoservice",
+	Namespace: prometheusNamespace,
 	Name:      "info",
 	Help:      "App environment info",
 }, []string{"version"})

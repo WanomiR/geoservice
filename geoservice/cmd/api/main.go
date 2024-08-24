@@ -31,7 +31,7 @@ func main() {
 
 	go a.Start()
 
-	//go simulateLoad()
+	go simulateLoad()
 
 	a.Shutdown()
 }

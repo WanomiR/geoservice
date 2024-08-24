@@ -156,7 +156,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "histogram_quantile(0.99, sum by(le) (rate(cache_access_duration_seconds_bucket[1m])))",
+          "expr": "histogram_quantile(0.99, sum by(le) (rate(geoservice_request_latency_seconds_bucket[1m])))",
           "fullMetaSearch": false,
           "includeNullMetadata": false,
           "instant": false,
@@ -172,7 +172,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "histogram_quantile(0.9, sum by(le) (rate(cache_access_duration_seconds_bucket[1m])))",
+          "expr": "histogram_quantile(0.9, sum by(le) (rate(geoservice_request_latency_seconds_bucket[1m])))",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": false,
@@ -189,7 +189,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "histogram_quantile(0.5, sum by(le) (rate(cache_access_duration_seconds_bucket[1m])))",
+          "expr": "histogram_quantile(0.5, sum by(le) (rate(geoservice_request_latency_seconds_bucket[1m])))",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": false,
@@ -200,7 +200,7 @@
           "useBackend": false
         }
       ],
-      "title": "Cache access latency",
+      "title": "Request latency",
       "type": "timeseries"
     },
     {
@@ -294,7 +294,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "rate(total_requests_count[1m])",
+          "expr": "rate(geoservice_total_requests_count[1m])",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,

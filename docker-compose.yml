@@ -52,7 +52,3 @@ services:
       - ./grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
       - ./grafana/dashboard.yaml:/etc/grafana/provisioning/dashboards/main.yaml
       - ./grafana/dashboards:/etc/dashboards
-      - ./grafana:/var/lib/grafana
-
-volumes:
-  grafana:
