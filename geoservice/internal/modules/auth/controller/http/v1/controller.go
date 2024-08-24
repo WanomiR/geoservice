@@ -1,9 +1,9 @@
 package v1
 
 import (
-	"geoservice/internal/lib/rr"
 	"geoservice/internal/modules/auth/usecase"
 	"github.com/wanomir/e"
+	"github.com/wanomir/rr"
 	"net/http"
 )
 
@@ -14,10 +14,10 @@ type Controller interface {
 
 type AuthController struct {
 	authService usecase.AuthServicer
-	rr          rr.ReadResponder
+	rr          *rr.ReadResponder
 }
 
-func NewAuthController(authService usecase.AuthServicer, readResponder rr.ReadResponder) *AuthController {
+func NewAuthController(authService usecase.AuthServicer, readResponder *rr.ReadResponder) *AuthController {
 	return &AuthController{
 		authService: authService,
 		rr:          readResponder,

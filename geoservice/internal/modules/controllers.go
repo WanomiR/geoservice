@@ -1,9 +1,9 @@
 package modules
 
 import (
-	"geoservice/internal/lib/rr"
 	auth "geoservice/internal/modules/auth/controller/http/v1"
 	geo "geoservice/internal/modules/geo/controller/http/v1"
+	"github.com/wanomir/rr"
 )
 
 type Controllers struct {
@@ -13,7 +13,7 @@ type Controllers struct {
 
 func NewControllers(services *Services) *Controllers {
 	return &Controllers{
-		Geo:  geo.NewGeoController(services.Geo, rr.NewReadRespond()),
-		Auth: auth.NewAuthController(services.Auth, rr.NewReadRespond()),
+		Geo:  geo.NewGeoController(services.Geo, rr.NewReadResponder()),
+		Auth: auth.NewAuthController(services.Auth, rr.NewReadResponder()),
 	}
 }

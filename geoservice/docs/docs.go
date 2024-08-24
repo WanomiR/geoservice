@@ -35,7 +35,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.AddressGeocode"
+                            "$ref": "#/definitions/internal_modules_geo_controller_http_v1.AddressGeocode"
                         }
                     }
                 ],
@@ -75,7 +75,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.AddressSearch"
+                            "$ref": "#/definitions/internal_modules_geo_controller_http_v1.AddressSearch"
                         }
                     }
                 ],
@@ -157,19 +157,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "rr.JSONResponse": {
-            "type": "object",
-            "properties": {
-                "data": {},
-                "error": {
-                    "type": "boolean"
-                },
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "v1.AddressGeocode": {
+        "internal_modules_geo_controller_http_v1.AddressGeocode": {
             "type": "object",
             "required": [
                 "lat",
@@ -186,7 +174,7 @@ const docTemplate = `{
                 }
             }
         },
-        "v1.AddressSearch": {
+        "internal_modules_geo_controller_http_v1.AddressSearch": {
             "type": "object",
             "required": [
                 "query"
@@ -195,6 +183,18 @@ const docTemplate = `{
                 "query": {
                     "type": "string",
                     "example": "Подкопаевский переулок"
+                }
+            }
+        },
+        "rr.JSONResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "error": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         }

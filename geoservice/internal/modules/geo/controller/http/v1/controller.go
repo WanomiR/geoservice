@@ -2,8 +2,8 @@ package v1
 
 import (
 	"errors"
-	"geoservice/internal/lib/rr"
 	"geoservice/internal/modules/geo/usecase"
+	"github.com/wanomir/rr"
 	"net/http"
 )
 
@@ -14,7 +14,7 @@ type Controller interface {
 
 type GeoController struct {
 	geoService usecase.GeoServicer
-	rr         rr.ReadResponder
+	rr         *rr.ReadResponder
 }
 
 type AddressSearch struct {
@@ -26,7 +26,7 @@ type AddressGeocode struct {
 	Lng string `json:"lng" example:"37.642589" binding:"required"`
 }
 
-func NewGeoController(geoService usecase.GeoServicer, responder rr.ReadResponder) *GeoController {
+func NewGeoController(geoService usecase.GeoServicer, responder *rr.ReadResponder) *GeoController {
 	return &GeoController{geoService: geoService, rr: responder}
 }
 

@@ -7,9 +7,7 @@ import (
 	"geoservice/internal/modules"
 	usecaseAuth "geoservice/internal/modules/auth/usecase"
 	"geoservice/internal/modules/geo/usecase"
-	"github.com/joho/godotenv"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/wanomir/e"
 	"log"
 	"net/http"
 	"os"
@@ -107,17 +105,7 @@ func (a *App) init() error {
 	return nil
 }
 
-func (a *App) readConfig(envPath ...string) (err error) {
-	if len(envPath) > 0 {
-		err = godotenv.Load(envPath[0])
-	} else {
-		err = godotenv.Load()
-	}
-
-	if err != nil {
-		return e.Wrap("couldn't read .env file", err)
-	}
-
+func (a *App) readConfig() error {
 	a.config = Config{
 		host:       os.Getenv("HOST"),
 		port:       os.Getenv("PORT"),
@@ -127,6 +115,10 @@ func (a *App) readConfig(envPath ...string) (err error) {
 		apiKey:     os.Getenv("DADATA_API_KEY"),
 		secretKey:  os.Getenv("DADATA_SECRET_KEY"),
 		appVersion: os.Getenv("APP_VERSION"),
+	}
+
+	if a.config.host == "" || a.config.port == "" || a.config.jwtSecret == "" {
+		return errors.New("env variables not set")
 	}
 
 	return nil

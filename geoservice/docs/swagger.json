@@ -29,7 +29,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.AddressGeocode"
+                            "$ref": "#/definitions/internal_modules_geo_controller_http_v1.AddressGeocode"
                         }
                     }
                 ],
@@ -69,7 +69,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.AddressSearch"
+                            "$ref": "#/definitions/internal_modules_geo_controller_http_v1.AddressSearch"
                         }
                     }
                 ],
@@ -151,19 +151,7 @@
         }
     },
     "definitions": {
-        "rr.JSONResponse": {
-            "type": "object",
-            "properties": {
-                "data": {},
-                "error": {
-                    "type": "boolean"
-                },
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "v1.AddressGeocode": {
+        "internal_modules_geo_controller_http_v1.AddressGeocode": {
             "type": "object",
             "required": [
                 "lat",
@@ -180,7 +168,7 @@
                 }
             }
         },
-        "v1.AddressSearch": {
+        "internal_modules_geo_controller_http_v1.AddressSearch": {
             "type": "object",
             "required": [
                 "query"
@@ -189,6 +177,18 @@
                 "query": {
                     "type": "string",
                     "example": "Подкопаевский переулок"
+                }
+            }
+        },
+        "rr.JSONResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "error": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         }

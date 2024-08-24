@@ -33,6 +33,7 @@ require (
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe // indirect
 	github.com/wanomir/e v1.0.0 // indirect
+	github.com/wanomir/rr v1.0.5 // indirect
 	golang.org/x/net v0.26.0 // indirect
 	golang.org/x/sys v0.23.0 // indirect
 	golang.org/x/tools v0.7.0 // indirect

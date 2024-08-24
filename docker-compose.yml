@@ -7,6 +7,16 @@ services:
     depends_on:
       - redis
     restart: always
+    environment:
+      APP_VERSION: ${APP_VERSION}
+      HOST: ${HOST}
+      PORT: ${PORT}
+      JWT_SECRET: ${JWT_SECRET}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      DADATA_API_KEY: ${DADATA_API_KEY}
+      DADATA_SECRET_KEY: ${DADATA_SECRET_KEY}
+
 
   redis:
     image: redis:latest

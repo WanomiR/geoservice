@@ -1,14 +1,6 @@
 basePath: /
 definitions:
-  rr.JSONResponse:
-    properties:
-      data: {}
-      error:
-        type: boolean
-      message:
-        type: string
-    type: object
-  v1.AddressGeocode:
+  internal_modules_geo_controller_http_v1.AddressGeocode:
     properties:
       lat:
         example: "55.753214"
@@ -20,13 +12,21 @@ definitions:
     - lat
     - lng
     type: object
-  v1.AddressSearch:
+  internal_modules_geo_controller_http_v1.AddressSearch:
     properties:
       query:
         example: Подкопаевский переулок
         type: string
     required:
     - query
+    type: object
+  rr.JSONResponse:
+    properties:
+      data: {}
+      error:
+        type: boolean
+      message:
+        type: string
     type: object
 host: localhost:8888
 info:
@@ -46,7 +46,7 @@ paths:
         name: query
         required: true
         schema:
-          $ref: '#/definitions/v1.AddressGeocode'
+          $ref: '#/definitions/internal_modules_geo_controller_http_v1.AddressGeocode'
       produces:
       - application/json
       responses:
@@ -72,7 +72,7 @@ paths:
         name: query
         required: true
         schema:
-          $ref: '#/definitions/v1.AddressSearch'
+          $ref: '#/definitions/internal_modules_geo_controller_http_v1.AddressSearch'
       produces:
       - application/json
       responses:
