@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"geoservice/internal/modules"
+	"geoservice/internal/modules/auth/infrastructure/repository"
 	usecaseAuth "geoservice/internal/modules/auth/usecase"
 	"geoservice/internal/modules/geo/infrastructure/geoprovider"
 	"geoservice/internal/modules/geo/usecase"
@@ -86,9 +87,8 @@ func (a *App) init() (err error) {
 	}
 	geoService := usecase.NewGeoService(geoProvider)
 
-	authService := usecaseAuth.NewAuthService(
-		a.config.host, a.config.host, a.config.jwtSecret, a.config.host,
-	)
+	dbRepo := repository.NewMapDBRepo(repository.User{Email: "john.doe@gmail.com", Password: "password"})
+	authService := usecaseAuth.NewAuthService(a.config.host, a.config.host, a.config.jwtSecret, a.config.host, dbRepo)
 
 	a.services = modules.NewServices(geoService, authService)
 	a.controllers = modules.NewControllers(a.services)

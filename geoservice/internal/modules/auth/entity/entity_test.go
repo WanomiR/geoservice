@@ -128,3 +128,38 @@ func TestAuth_VerifyRequest(t *testing.T) {
 		}
 	})
 }
+
+func TestAuth_RequireAuthorization(t *testing.T) {
+	// create handler middleware
+	requireAuth := auth.RequireAuthorization(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
+
+	// valid case with header
+	token, _ := auth.GenerateToken("wanomir")
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	// set authorization header
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	wr := httptest.NewRecorder()
+	requireAuth.ServeHTTP(wr, req)
+
+	t.Run("valid case with header", func(t *testing.T) {
+		if _, _, err := auth.VerifyRequest(wr, req); err != nil {
+			t.Errorf("VerifyRequest() error = %v, want %v", err, false)
+		}
+	})
+
+	// invalid case with wrong header
+	token, _ = auth.GenerateToken("wanomir")
+	req = httptest.NewRequest(http.MethodGet, "/", nil)
+	// set bad authorization header
+	req.Header.Set("Authorization", "Bearer ")
+
+	wr = httptest.NewRecorder()
+	requireAuth.ServeHTTP(wr, req)
+
+	t.Run("invalid case with bad header", func(t *testing.T) {
+		if _, _, err := auth.VerifyRequest(wr, req); err == nil {
+			t.Errorf("VerifyRequest() error = %v, want %v", err, true)
+		}
+	})
+}

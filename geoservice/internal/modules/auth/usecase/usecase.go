@@ -3,14 +3,16 @@ package usecase
 import (
 	"errors"
 	"geoservice/internal/modules/auth/entity"
-	"geoservice/internal/modules/auth/infrastructure/repository"
 	"github.com/wanomir/e"
-	"log"
 	"net/http"
 )
 
+type User struct {
+	Email, Password string
+}
+
 type DatabaseRepo interface {
-	GetUserByEmail(email string) (entity.User, error)
+	GetUserByEmail(email string) (any, error)
 	InsertUser(email, password string) error
 }
 
@@ -19,9 +21,9 @@ type AuthService struct {
 	db   DatabaseRepo
 }
 
-func NewAuthService(issuer, audience, secret, cookieDomain string) *AuthService {
+func NewAuthService(issuer, audience, secret, cookieDomain string, dbRepo DatabaseRepo) *AuthService {
 	return &AuthService{
-		db:   repository.NewMapDBRepo(entity.User{Email: "john.doe@gmail.com", Password: "password"}),
+		db:   dbRepo,
 		auth: entity.NewAuth(issuer, audience, secret, cookieDomain),
 	}
 }
@@ -49,13 +51,16 @@ func (s *AuthService) Register(email, password string) error {
 }
 
 func (s *AuthService) Authorize(email string, password string) (string, *http.Cookie, error) {
-	user, err := s.db.GetUserByEmail(email)
+	result, err := s.db.GetUserByEmail(email)
 	if err != nil {
 		return "", nil, err
 	}
 
+	// cast the result to user type
+	user := result.(User)
+
 	if ok, err := s.auth.VerifyPassword(password, user.Password); !ok || err != nil {
-		return "", nil, e.WrapIfErr("invalid password", err)
+		return "", nil, errors.New("invalid password")
 	}
 
 	token, err := s.auth.GenerateToken(email)
@@ -73,15 +78,5 @@ func (s *AuthService) ResetCookie() *http.Cookie {
 }
 
 func (s *AuthService) RequireAuthorization(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, _, err := s.auth.VerifyRequest(w, r)
-		if err != nil {
-			log.Println(err.Error())
-			w.WriteHeader(http.StatusUnauthorized)
-			_, _ = w.Write([]byte("Authorization required"))
-
-		} else {
-			next.ServeHTTP(w, r)
-		}
-	})
+	return s.auth.RequireAuthorization(next)
 }

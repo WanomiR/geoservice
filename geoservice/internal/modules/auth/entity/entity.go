@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 	"net/http"
 	"regexp"
 	"strings"
@@ -165,6 +166,20 @@ func (a *Auth) VerifyRequest(w http.ResponseWriter, r *http.Request) (string, *C
 	}
 
 	return token, claims, nil
+}
+
+func (a *Auth) RequireAuthorization(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _, err := a.VerifyRequest(w, r)
+		if err != nil {
+			log.Println(err.Error())
+			w.WriteHeader(http.StatusUnauthorized)
+			_, _ = w.Write([]byte("Authorization required"))
+
+		} else {
+			next.ServeHTTP(w, r)
+		}
+	})
 }
 
 func (a *Auth) getCookieValue(r *http.Request) (string, error) {
