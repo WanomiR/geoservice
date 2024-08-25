@@ -3,7 +3,7 @@ package http_v1
 import (
 	"bytes"
 	"errors"
-	"geoservice/internal/modules/auth/entity"
+	"geoservice/internal/modules/auth/dto"
 	"github.com/wanomir/rr"
 	"net/http"
 	"net/http/httptest"
@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-var MockUser = entity.User{
+var MockUser = dto.User{
 	Email:    "john.doe@gmail.com",
 	Password: "password",
 }
@@ -98,7 +98,7 @@ func TestAuthController_Login(t *testing.T) {
 }
 
 type MockAuthService struct {
-	mockUsers []entity.User
+	mockUsers []dto.User
 }
 
 func TestAuthController_Logout(t *testing.T) {
@@ -114,7 +114,7 @@ func TestAuthController_Logout(t *testing.T) {
 	}
 }
 
-func NewMockAuthService(mockUsers ...entity.User) *MockAuthService {
+func NewMockAuthService(mockUsers ...dto.User) *MockAuthService {
 	a := new(MockAuthService)
 
 	for _, user := range mockUsers {

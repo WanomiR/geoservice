@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"errors"
+	"geoservice/internal/modules/auth/dto"
 	"golang.org/x/crypto/bcrypt"
 	"sync"
 	"testing"
@@ -12,7 +13,7 @@ var authService *AuthService
 func init() {
 	authService = NewAuthService(
 		"localhost", "localhost", "secret", "localhost",
-		NewMockDBRepo(User{"john.doe@gmail.com", "password"}),
+		NewMockDBRepo(dto.User{"john.doe@gmail.com", "password"}),
 	)
 }
 
@@ -68,7 +69,7 @@ type MockDBRepo struct {
 	m     *sync.RWMutex
 }
 
-func NewMockDBRepo(initUsers ...User) *MockDBRepo {
+func NewMockDBRepo(initUsers ...dto.User) *MockDBRepo {
 	store := make(map[string]string)
 
 	for _, user := range initUsers {
@@ -82,16 +83,16 @@ func NewMockDBRepo(initUsers ...User) *MockDBRepo {
 	}
 }
 
-func (db *MockDBRepo) GetUserByEmail(userEmail string) (any, error) {
+func (db *MockDBRepo) GetUserByEmail(userEmail string) (dto.User, error) {
 	db.m.RLock() // blocks for writing
 	defer db.m.RUnlock()
 
 	for email, password := range db.store {
 		if email == userEmail {
-			return User{Email: email, Password: password}, nil
+			return dto.User{Email: email, Password: password}, nil
 		}
 	}
-	return User{}, errors.New("user not found")
+	return dto.User{}, errors.New("user not found")
 }
 
 func (db *MockDBRepo) InsertUser(email, password string) error {

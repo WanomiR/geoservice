@@ -2,20 +2,17 @@ package repository
 
 import (
 	"errors"
+	"geoservice/internal/modules/auth/dto"
 	"golang.org/x/crypto/bcrypt"
 	"sync"
 )
-
-type User struct {
-	Email, Password string
-}
 
 type MapDBRepo struct {
 	store map[string]string
 	m     *sync.RWMutex
 }
 
-func NewMapDBRepo(initUsers ...User) *MapDBRepo {
+func NewMapDBRepo(initUsers ...dto.User) *MapDBRepo {
 	store := make(map[string]string)
 
 	for _, user := range initUsers {
@@ -29,16 +26,16 @@ func NewMapDBRepo(initUsers ...User) *MapDBRepo {
 	}
 }
 
-func (db *MapDBRepo) GetUserByEmail(userEmail string) (any, error) {
+func (db *MapDBRepo) GetUserByEmail(userEmail string) (dto.User, error) {
 	db.m.RLock() // blocks for writing
 	defer db.m.RUnlock()
 
 	for email, password := range db.store {
 		if email == userEmail {
-			return User{Email: email, Password: password}, nil
+			return dto.User{Email: email, Password: password}, nil
 		}
 	}
-	return User{}, errors.New("user not found")
+	return dto.User{}, errors.New("user not found")
 }
 
 func (db *MapDBRepo) InsertUser(email, password string) error {

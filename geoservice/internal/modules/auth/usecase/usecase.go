@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"errors"
+	"geoservice/internal/modules/auth/dto"
 	"geoservice/internal/modules/auth/entity"
 	"github.com/wanomir/e"
 	"net/http"
@@ -12,7 +13,7 @@ type User struct {
 }
 
 type DatabaseRepo interface {
-	GetUserByEmail(email string) (any, error)
+	GetUserByEmail(email string) (dto.User, error)
 	InsertUser(email, password string) error
 }
 
@@ -51,13 +52,10 @@ func (s *AuthService) Register(email, password string) error {
 }
 
 func (s *AuthService) Authorize(email string, password string) (string, *http.Cookie, error) {
-	result, err := s.db.GetUserByEmail(email)
+	user, err := s.db.GetUserByEmail(email)
 	if err != nil {
 		return "", nil, err
 	}
-
-	// cast the result to user type
-	user := result.(User)
 
 	if ok, err := s.auth.VerifyPassword(password, user.Password); !ok || err != nil {
 		return "", nil, errors.New("invalid password")
