@@ -11,11 +11,6 @@ import (
 	"time"
 )
 
-type User struct {
-	Email    string `json:"email" binding:"required" example:"john.doe@gmail.com"`
-	Password string `json:"password" binding:"required" example:"password"`
-}
-
 type TokensPair struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
@@ -137,7 +132,7 @@ func (a *Auth) CreateExpiredCookie() *http.Cookie {
 
 func (a *Auth) VerifyRequest(w http.ResponseWriter, r *http.Request) (string, *Claims, error) {
 	// try to get token from cookie
-	token, err := a.getCookie(r)
+	token, err := a.getCookieValue(r)
 	if err != nil {
 		// check header if no cookie found
 		if token, err = a.getTokenFromHeader(w, r); err != nil {
@@ -150,6 +145,7 @@ func (a *Auth) VerifyRequest(w http.ResponseWriter, r *http.Request) (string, *C
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
+
 		return []byte(a.Secret), nil
 	}
 
@@ -158,7 +154,7 @@ func (a *Auth) VerifyRequest(w http.ResponseWriter, r *http.Request) (string, *C
 
 	if _, err = jwt.ParseWithClaims(token, claims, parseClaims); err != nil {
 		if strings.HasPrefix(err.Error(), "token is expired by") {
-			return "", nil, errors.New("token is expired by")
+			return "", nil, errors.New("expired token")
 		}
 		return "", nil, err
 	}
@@ -171,7 +167,7 @@ func (a *Auth) VerifyRequest(w http.ResponseWriter, r *http.Request) (string, *C
 	return token, claims, nil
 }
 
-func (a *Auth) getCookie(r *http.Request) (string, error) {
+func (a *Auth) getCookieValue(r *http.Request) (string, error) {
 	cookie, err := r.Cookie(a.CookieName)
 	if err != nil || cookie.Value == "" {
 		return "", errors.New("invalid cookie")
