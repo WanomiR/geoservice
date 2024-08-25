@@ -107,14 +107,14 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Email for login",
+                        "description": "Email for login (john.doe@gmail.com)",
                         "name": "email",
                         "in": "formData",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "Password for login",
+                        "description": "Password for login (password)",
                         "name": "password",
                         "in": "formData",
                         "required": true

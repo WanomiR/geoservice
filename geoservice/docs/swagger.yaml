@@ -90,12 +90,12 @@ paths:
   /auth/login:
     post:
       parameters:
-      - description: Email for login
+      - description: Email for login (john.doe@gmail.com)
         in: formData
         name: email
         required: true
         type: string
-      - description: Password for login
+      - description: Password for login (password)
         in: formData
         name: password
         required: true

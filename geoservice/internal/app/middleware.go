@@ -14,7 +14,7 @@ var requestsCount = prometheus.NewCounterVec(prometheus.CounterOpts{
 
 var requestsLatency = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 	Namespace: prometheusNamespace,
-	Name:      "request_latency_seconds",
+	Name:      "response_latency_seconds",
 	Help:      "Histogram of response times in seconds.",
 	Buckets:   []float64{0.001, 0.002, 0.004, 0.008, 0.016, 0.032, 0.064, 0.128, 0.256, 0.512, 1.024, 2.048},
 }, []string{"route", "method"})
