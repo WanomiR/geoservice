@@ -18,7 +18,6 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 1,
   "links": [],
   "panels": [
     {
@@ -351,7 +350,7 @@
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "",
+          "fields": "/^1\\.0\\.0$/",
           "values": false
         },
         "showPercentChange": false,
@@ -396,6 +395,6 @@
   "timezone": "browser",
   "title": "Geoservice Dashboard",
   "uid": "cdv33kvgx2w3ka",
-  "version": 6,
+  "version": 1,
   "weekStart": ""
 }

@@ -13,5 +13,7 @@ func main() {
 
 	go a.Start()
 
+	go a.ServeMetrics()
+
 	a.Shutdown()
 }

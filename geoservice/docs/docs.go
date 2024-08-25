@@ -96,7 +96,7 @@ const docTemplate = `{
             }
         },
         "/auth/login": {
-            "get": {
+            "post": {
                 "produces": [
                     "application/json"
                 ],
@@ -109,20 +109,26 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Email for login",
                         "name": "email",
-                        "in": "query",
+                        "in": "formData",
                         "required": true
                     },
                     {
                         "type": "string",
                         "description": "Password for login",
                         "name": "password",
-                        "in": "query",
+                        "in": "formData",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/rr.JSONResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/rr.JSONResponse"
                         }

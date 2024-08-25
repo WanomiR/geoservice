@@ -26,7 +26,7 @@ func (a *App) routes() *chi.Mux {
 		})
 
 		r.Route("/auth", func(r chi.Router) {
-			r.Get("/login", a.controllers.Auth.Login)
+			r.Post("/login", a.controllers.Auth.Login)
 			r.Get("/logout", a.controllers.Auth.Logout)
 		})
 

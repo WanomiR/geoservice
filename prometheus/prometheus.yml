@@ -8,4 +8,8 @@ rule_files:
 scrape_configs:
   - job_name: geoservice
     static_configs:
-      - targets: ['geoservice:8888', 'geoprovider:7777']
+      - targets: ['geoservice:8888']
+
+  - job_name: geoprovider
+    static_configs:
+      - targets: ['geoprovider:7778']

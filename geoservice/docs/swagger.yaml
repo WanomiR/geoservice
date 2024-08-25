@@ -88,15 +88,15 @@ paths:
       tags:
       - address
   /auth/login:
-    get:
+    post:
       parameters:
       - description: Email for login
-        in: query
+        in: formData
         name: email
         required: true
         type: string
       - description: Password for login
-        in: query
+        in: formData
         name: password
         required: true
         type: string
@@ -105,6 +105,10 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/rr.JSONResponse'
+        "400":
+          description: Bad Request
           schema:
             $ref: '#/definitions/rr.JSONResponse'
         "401":

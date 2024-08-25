@@ -7,9 +7,11 @@ import (
 	cntrl "geoprovider/internal/controller/rpc_v1"
 	"geoprovider/internal/usecase"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/wanomir/e"
 	"log"
 	"net"
+	"net/http"
 	"net/rpc"
 	"os"
 	"os/signal"
@@ -24,6 +26,10 @@ var appInfo = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 	Name:      "info",
 	Help:      "App environment info",
 }, []string{"version"})
+
+func init() {
+	prometheus.MustRegister(appInfo)
+}
 
 type Config struct {
 	host        string
@@ -77,7 +83,8 @@ func (a *App) Shutdown() {
 }
 
 func (a *App) ServeMetrics() {
-	panic("not implemented")
+	http.Handle("/metrics", promhttp.Handler())
+	log.Fatal(http.ListenAndServe(":7778", nil))
 }
 
 func (a *App) init() error {

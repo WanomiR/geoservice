@@ -30,15 +30,19 @@ func NewAuthController(authService Auther, readResponder *rr.ReadResponder) *Aut
 // @Summary Logs user into the system
 // @Tags auth
 // @Produce json
-// @Param email query string true "Email for login"
-// @Param password query string true "Password for login"
+// @Param email formData string true "Email for login (john.doe@gmail.com)"
+// @Param password formData string true "Password for login (password)"
 // @Success 200 {object} rr.JSONResponse
-// @Failure 401 {object} rr.JSONResponse
-// @Router /auth/login [get]
+// @Failure 400,401 {object} rr.JSONResponse
+// @Router /auth/login [post]
 func (c *AuthController) Login(w http.ResponseWriter, r *http.Request) {
-	query := r.URL.Query()
-	email := query.Get("email")
-	password := query.Get("password")
+	if err := r.ParseForm(); err != nil {
+		_ = c.rr.WriteJSONError(w, e.Wrap("could not parse form data", err))
+		return
+	}
+
+	email := r.FormValue("email")
+	password := r.FormValue("password")
 
 	token, cookie, err := c.authService.Authorize(email, password)
 	if err != nil {
