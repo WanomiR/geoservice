@@ -11,7 +11,7 @@ import (
 
 type DatabaseRepo interface {
 	GetUserByEmail(email string) (entity.User, error)
-	InsertUser(user entity.User) error
+	InsertUser(email, password string) error
 }
 
 type AuthService struct {
@@ -26,22 +26,22 @@ func NewAuthService(issuer, audience, secret, cookieDomain string) *AuthService 
 	}
 }
 
-func (s *AuthService) Register(user entity.User) error {
-	if len(user.Email) < 8 {
-		return errors.New("email must be at least 7 characters")
+func (s *AuthService) Register(email, password string) error {
+	if err := s.auth.ValidateEmail(email); err != nil {
+		return err
 	}
 
-	if len(user.Password) < 8 {
-		return errors.New("password must be at least 7 characters")
+	if err := s.auth.ValidatePassword(password); err != nil {
+		return err
 	}
 
-	if _, err := s.db.GetUserByEmail(user.Email); err == nil {
+	if _, err := s.db.GetUserByEmail(email); err == nil {
 		return errors.New("user already exists")
 	}
 
-	user.Password, _ = s.auth.EncryptPassword(user.Password)
+	password, _ = s.auth.EncryptPassword(password)
 
-	if err := s.db.InsertUser(user); err != nil {
+	if err := s.db.InsertUser(email, password); err != nil {
 		return e.Wrap("couldn't insert user", err)
 	}
 

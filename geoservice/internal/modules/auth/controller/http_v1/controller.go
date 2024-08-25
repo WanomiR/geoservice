@@ -1,14 +1,13 @@
 package http_v1
 
 import (
-	eauth "geoservice/internal/modules/auth/entity"
 	"github.com/wanomir/e"
 	"github.com/wanomir/rr"
 	"net/http"
 )
 
 type Auther interface {
-	Register(user eauth.User) error
+	Register(email, password string) error
 	Authorize(email string, password string) (string, *http.Cookie, error)
 	ResetCookie() *http.Cookie
 	RequireAuthorization(next http.Handler) http.Handler
@@ -24,6 +23,33 @@ func NewAuthController(authService Auther, readResponder *rr.ReadResponder) *Aut
 		authService: authService,
 		rr:          readResponder,
 	}
+}
+
+// Register godoc
+// @Summary Creates new user
+// @Tags auth
+// @Produce json
+// @Param email formData string true "New user email"
+// @Param password formData string true "New user password"
+// @Success 201 {object} rr.JSONResponse
+// @Failure 400 {object} rr.JSONResponse
+// @Router /auth/register [post]
+func (c *AuthController) Register(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		_ = c.rr.WriteJSONError(w, e.Wrap("could not parse form data", err))
+		return
+	}
+
+	email := r.FormValue("email")
+	password := r.FormValue("password")
+
+	if err := c.authService.Register(email, password); err != nil {
+		_ = c.rr.WriteJSONError(w, e.Wrap("could not register user", err))
+		return
+	}
+
+	resp := rr.JSONResponse{Message: "user registered"}
+	_ = c.rr.WriteJSON(w, 201, resp)
 }
 
 // Login godoc

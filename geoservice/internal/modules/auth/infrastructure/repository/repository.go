@@ -35,11 +35,11 @@ func (db *MapDBRepo) GetUserByEmail(userEmail string) (entity.User, error) {
 	return entity.User{}, errors.New("user not found")
 }
 
-func (db *MapDBRepo) InsertUser(user entity.User) error {
+func (db *MapDBRepo) InsertUser(email, password string) error {
 	db.m.Lock() // blocks for reading and writing
 	defer db.m.Unlock()
 
-	db.store[user.Email] = user.Password
+	db.store[email] = password
 
 	return nil
 }

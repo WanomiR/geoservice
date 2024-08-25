@@ -6,6 +6,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -44,6 +45,22 @@ func NewAuth(issuer, audience, secret, cookieDomain string) *Auth {
 		CookiePath:   "/",
 		CookieName:   "__Host-refresh_token",
 	}
+}
+
+func (a *Auth) ValidateEmail(email string) error {
+	re := regexp.MustCompile(`^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$`)
+	if !re.MatchString(email) {
+		return errors.New("invalid email")
+	}
+	return nil
+}
+
+func (a *Auth) ValidatePassword(password string) error {
+	re := regexp.MustCompile(`.{3,}`)
+	if !re.MatchString(password) {
+		return errors.New("invalid password: must be at least 3 characters long")
+	}
+	return nil
 }
 
 func (a *Auth) EncryptPassword(password string) (string, error) {

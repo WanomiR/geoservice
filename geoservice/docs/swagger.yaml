@@ -130,6 +130,33 @@ paths:
       summary: Logs out current user
       tags:
       - auth
+  /auth/register:
+    post:
+      parameters:
+      - description: New user email
+        in: formData
+        name: email
+        required: true
+        type: string
+      - description: New user password
+        in: formData
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/rr.JSONResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rr.JSONResponse'
+      summary: Creates new user
+      tags:
+      - auth
 securityDefinitions:
   ApiKeyAuth:
     in: header

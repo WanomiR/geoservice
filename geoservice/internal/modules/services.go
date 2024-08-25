@@ -1,14 +1,13 @@
 package modules
 
 import (
-	eauth "geoservice/internal/modules/auth/entity"
 	egeo "geoservice/internal/modules/geo/entity"
 	"net/http"
 )
 
 type Auther interface {
-	Register(user eauth.User) error
-	Authorize(email string, password string) (string, *http.Cookie, error)
+	Register(email, password string) error
+	Authorize(email, password string) (string, *http.Cookie, error)
 	ResetCookie() *http.Cookie
 	RequireAuthorization(next http.Handler) http.Handler
 }
