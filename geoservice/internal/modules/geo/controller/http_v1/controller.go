@@ -1,32 +1,32 @@
-package v1
+package http_v1
 
 import (
 	"errors"
-	"geoservice/internal/lib/rr"
-	"geoservice/internal/modules/geo/usecase"
+	"geoservice/internal/modules/geo/dto"
+	"github.com/wanomir/rr"
 	"net/http"
 )
 
-type Controller interface {
-	AddressSearch(w http.ResponseWriter, r *http.Request)
-	AddressGeocode(w http.ResponseWriter, r *http.Request)
+type GeoServicer interface {
+	AddressSearch(input string) ([]dto.Address, error)
+	GeoCode(lat, lng string) ([]dto.Address, error)
 }
 
-type GeoController struct {
-	geoService usecase.GeoServicer
-	rr         rr.ReadResponder
-}
-
-type AddressSearch struct {
+type RequestAddressSearch struct {
 	Query string `json:"query" binding:"required" example:"Подкопаевский переулок"`
 }
 
-type AddressGeocode struct {
+type RequestAddressGeocode struct {
 	Lat string `json:"lat" example:"55.753214" binding:"required"`
 	Lng string `json:"lng" example:"37.642589" binding:"required"`
 }
 
-func NewGeoController(geoService usecase.GeoServicer, responder rr.ReadResponder) *GeoController {
+type GeoController struct {
+	geoService GeoServicer
+	rr         *rr.ReadResponder
+}
+
+func NewGeoController(geoService GeoServicer, responder *rr.ReadResponder) *GeoController {
 	return &GeoController{geoService: geoService, rr: responder}
 }
 
@@ -36,12 +36,12 @@ func NewGeoController(geoService usecase.GeoServicer, responder rr.ReadResponder
 // @Tags address
 // @Accept json
 // @Produce json
-// @Param query body AddressSearch true "street name"
+// @Param query body RequestAddressSearch true "street name"
 // @Success 200 {object} rr.JSONResponse
 // @Failure 400 {object} rr.JSONResponse
 // @Router /address/search [post]
 func (g *GeoController) AddressSearch(w http.ResponseWriter, r *http.Request) {
-	var req AddressSearch
+	var req RequestAddressSearch
 	_ = g.rr.ReadJSON(w, r, &req)
 
 	if req.Query == "" {
@@ -66,12 +66,12 @@ func (g *GeoController) AddressSearch(w http.ResponseWriter, r *http.Request) {
 // @Tags address
 // @Accept json
 // @Produce json
-// @Param query body AddressGeocode true "coordinates"
+// @Param query body RequestAddressGeocode true "coordinates"
 // @Success 200 {object} rr.JSONResponse
 // @Failure 400 {object} rr.JSONResponse
 // @Router /address/geocode [post]
 func (g *GeoController) AddressGeocode(w http.ResponseWriter, r *http.Request) {
-	var req AddressGeocode
+	var req RequestAddressGeocode
 	_ = g.rr.ReadJSON(w, r, &req)
 
 	if req.Lat == "" || req.Lng == "" {

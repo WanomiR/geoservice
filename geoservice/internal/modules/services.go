@@ -1,15 +1,27 @@
 package modules
 
 import (
-	auth "geoservice/internal/modules/auth/usecase"
-	geo "geoservice/internal/modules/geo/usecase"
+	"geoservice/internal/modules/geo/dto"
+	"net/http"
 )
 
-type Services struct {
-	Geo  geo.GeoServicer
-	Auth auth.AuthServicer
+type Auther interface {
+	Register(email, password string) error
+	Authorize(email, password string) (string, *http.Cookie, error)
+	ResetCookie() *http.Cookie
+	RequireAuthorization(next http.Handler) http.Handler
 }
 
-func NewServices(geo geo.GeoServicer, auth auth.AuthServicer) *Services {
+type GeoProvider interface {
+	AddressSearch(input string) ([]dto.Address, error)
+	GeoCode(lat, lng string) ([]dto.Address, error)
+}
+
+type Services struct {
+	Geo  GeoProvider
+	Auth Auther
+}
+
+func NewServices(geo GeoProvider, auth Auther) *Services {
 	return &Services{Geo: geo, Auth: auth}
 }

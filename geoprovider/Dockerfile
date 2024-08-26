@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY . .
 
-RUN go mod init geoservice && go mod tidy
+RUN go mod init geoprovider && go mod tidy
 
 RUN go build -o main ./cmd/api
 
@@ -12,8 +12,7 @@ RUN go build -o main ./cmd/api
 FROM alpine:latest
 
 COPY --from=builder /app/main /main
-COPY --from=builder /app/docs /docs
 
-EXPOSE 8888
+EXPOSE 7777
 
 CMD ["/main"]

@@ -5,11 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"geoservice/internal/modules"
+	"geoservice/internal/modules/auth/dto"
+	"geoservice/internal/modules/auth/infrastructure/repository"
 	usecaseAuth "geoservice/internal/modules/auth/usecase"
+	"geoservice/internal/modules/geo/infrastructure/geoprovider"
 	"geoservice/internal/modules/geo/usecase"
-	"github.com/joho/godotenv"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/wanomir/e"
 	"log"
 	"net/http"
 	"os"
@@ -18,21 +19,26 @@ import (
 	"time"
 )
 
+var prometheusNamespace = "geoservice"
+
 var appInfo = prometheus.NewGaugeVec(prometheus.GaugeOpts{
-	Namespace: "geoservice",
+	Namespace: prometheusNamespace,
 	Name:      "info",
 	Help:      "App environment info",
 }, []string{"version"})
 
+func init() {
+	prometheus.MustRegister(appInfo)
+}
+
 type Config struct {
-	host       string
-	port       string
-	jwtSecret  string
-	redisHost  string
-	redisPort  string
-	apiKey     string
-	secretKey  string
-	appVersion string
+	host         string
+	port         string
+	jwtSecret    string
+	providerHost string
+	providerPort string
+	providerName string
+	appVersion   string
 }
 
 type App struct {
@@ -41,10 +47,6 @@ type App struct {
 	signalChan  chan os.Signal
 	services    *modules.Services
 	controllers *modules.Controllers
-}
-
-func init() {
-	prometheus.MustRegister(appInfo)
 }
 
 func NewApp() (*App, error) {
@@ -58,7 +60,7 @@ func NewApp() (*App, error) {
 }
 
 func (a *App) Start() {
-	fmt.Println("Started server on port", a.config.port)
+	fmt.Println("Started http server on port", a.config.port)
 	if err := a.server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatal(err)
 	}
@@ -75,19 +77,19 @@ func (a *App) Shutdown() {
 	fmt.Println("Shutting down server gracefully")
 }
 
-func (a *App) init() error {
-	if err := a.readConfig(); err != nil {
+func (a *App) init() (err error) {
+	if err = a.readConfig(); err != nil {
 		return err
 	}
 
-	geoService := usecase.NewGeoCacheProxy(
-		usecase.NewGeoService(a.config.apiKey, a.config.secretKey),
-		fmt.Sprintf("%s:%s", a.config.redisHost, a.config.redisPort),
-	)
+	geoProvider, err := geoprovider.NewProvider(a.config.providerHost, a.config.providerPort, a.config.providerName)
+	if err != nil {
+		return err
+	}
+	geoService := usecase.NewGeoService(geoProvider)
 
-	authService := usecaseAuth.NewAuthService(
-		a.config.host, a.config.host, a.config.jwtSecret, a.config.host,
-	)
+	dbRepo := repository.NewMapDBRepo(dto.User{Email: "john.doe@gmail.com", Password: "password"})
+	authService := usecaseAuth.NewAuthService(a.config.host, a.config.host, a.config.jwtSecret, a.config.host, dbRepo)
 
 	a.services = modules.NewServices(geoService, authService)
 	a.controllers = modules.NewControllers(a.services)
@@ -107,26 +109,19 @@ func (a *App) init() error {
 	return nil
 }
 
-func (a *App) readConfig(envPath ...string) (err error) {
-	if len(envPath) > 0 {
-		err = godotenv.Load(envPath[0])
-	} else {
-		err = godotenv.Load()
-	}
-
-	if err != nil {
-		return e.Wrap("couldn't read .env file", err)
-	}
-
+func (a *App) readConfig() error {
 	a.config = Config{
-		host:       os.Getenv("HOST"),
-		port:       os.Getenv("PORT"),
-		jwtSecret:  os.Getenv("JWT_SECRET"),
-		redisHost:  os.Getenv("REDIS_HOST"),
-		redisPort:  os.Getenv("REDIS_PORT"),
-		apiKey:     os.Getenv("DADATA_API_KEY"),
-		secretKey:  os.Getenv("DADATA_SECRET_KEY"),
-		appVersion: os.Getenv("APP_VERSION"),
+		host:         os.Getenv("HOST"),
+		port:         os.Getenv("PORT"),
+		jwtSecret:    os.Getenv("JWT_SECRET"),
+		providerHost: os.Getenv("GEOPROVIDER_HOST"),
+		providerPort: os.Getenv("GEOPROVIDER_PORT"),
+		providerName: os.Getenv("GEOPROVIDER_NAME"),
+		appVersion:   os.Getenv("APP_VERSION"),
+	}
+
+	if a.config.host == "" || a.config.port == "" || a.config.jwtSecret == "" || a.config.providerHost == "" || a.config.providerPort == "" {
+		return errors.New("env variables not set")
 	}
 
 	return nil

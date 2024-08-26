@@ -5,5 +5,7 @@ all: swagger_generate build
 build:
 	@docker compose up --build --force-recreate
 
-swagger_generate:
-	@cd geoservice && swag init -g ./cmd/api/main.go && cd ..
+swagger_generate: swagger_generate_geoservice
+
+swagger_generate_geoservice:
+	@cd geoservice && swag init --parseDependency -g ./cmd/api/main.go && cd ..

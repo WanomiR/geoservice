@@ -35,7 +35,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.AddressGeocode"
+                            "$ref": "#/definitions/internal_modules_geo_controller_http_v1.RequestAddressGeocode"
                         }
                     }
                 ],
@@ -75,7 +75,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.AddressSearch"
+                            "$ref": "#/definitions/internal_modules_geo_controller_http_v1.RequestAddressSearch"
                         }
                     }
                 ],
@@ -96,7 +96,7 @@ const docTemplate = `{
             }
         },
         "/auth/login": {
-            "get": {
+            "post": {
                 "produces": [
                     "application/json"
                 ],
@@ -107,22 +107,28 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Email for login",
+                        "description": "Email for login (john.doe@gmail.com)",
                         "name": "email",
-                        "in": "query",
+                        "in": "formData",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "Password for login",
+                        "description": "Password for login (password)",
                         "name": "password",
-                        "in": "query",
+                        "in": "formData",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/rr.JSONResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/rr.JSONResponse"
                         }
@@ -154,22 +160,51 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/auth/register": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Creates new user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "New user email",
+                        "name": "email",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "New user password",
+                        "name": "password",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/rr.JSONResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/rr.JSONResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
-        "rr.JSONResponse": {
-            "type": "object",
-            "properties": {
-                "data": {},
-                "error": {
-                    "type": "boolean"
-                },
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "v1.AddressGeocode": {
+        "internal_modules_geo_controller_http_v1.RequestAddressGeocode": {
             "type": "object",
             "required": [
                 "lat",
@@ -186,7 +221,7 @@ const docTemplate = `{
                 }
             }
         },
-        "v1.AddressSearch": {
+        "internal_modules_geo_controller_http_v1.RequestAddressSearch": {
             "type": "object",
             "required": [
                 "query"
@@ -195,6 +230,18 @@ const docTemplate = `{
                 "query": {
                     "type": "string",
                     "example": "Подкопаевский переулок"
+                }
+            }
+        },
+        "rr.JSONResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "error": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         }

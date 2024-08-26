@@ -1,14 +1,6 @@
 basePath: /
 definitions:
-  rr.JSONResponse:
-    properties:
-      data: {}
-      error:
-        type: boolean
-      message:
-        type: string
-    type: object
-  v1.AddressGeocode:
+  internal_modules_geo_controller_http_v1.RequestAddressGeocode:
     properties:
       lat:
         example: "55.753214"
@@ -20,13 +12,21 @@ definitions:
     - lat
     - lng
     type: object
-  v1.AddressSearch:
+  internal_modules_geo_controller_http_v1.RequestAddressSearch:
     properties:
       query:
         example: Подкопаевский переулок
         type: string
     required:
     - query
+    type: object
+  rr.JSONResponse:
+    properties:
+      data: {}
+      error:
+        type: boolean
+      message:
+        type: string
     type: object
 host: localhost:8888
 info:
@@ -46,7 +46,7 @@ paths:
         name: query
         required: true
         schema:
-          $ref: '#/definitions/v1.AddressGeocode'
+          $ref: '#/definitions/internal_modules_geo_controller_http_v1.RequestAddressGeocode'
       produces:
       - application/json
       responses:
@@ -72,7 +72,7 @@ paths:
         name: query
         required: true
         schema:
-          $ref: '#/definitions/v1.AddressSearch'
+          $ref: '#/definitions/internal_modules_geo_controller_http_v1.RequestAddressSearch'
       produces:
       - application/json
       responses:
@@ -88,15 +88,15 @@ paths:
       tags:
       - address
   /auth/login:
-    get:
+    post:
       parameters:
-      - description: Email for login
-        in: query
+      - description: Email for login (john.doe@gmail.com)
+        in: formData
         name: email
         required: true
         type: string
-      - description: Password for login
-        in: query
+      - description: Password for login (password)
+        in: formData
         name: password
         required: true
         type: string
@@ -105,6 +105,10 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/rr.JSONResponse'
+        "400":
+          description: Bad Request
           schema:
             $ref: '#/definitions/rr.JSONResponse'
         "401":
@@ -124,6 +128,33 @@ paths:
           schema:
             $ref: '#/definitions/rr.JSONResponse'
       summary: Logs out current user
+      tags:
+      - auth
+  /auth/register:
+    post:
+      parameters:
+      - description: New user email
+        in: formData
+        name: email
+        required: true
+        type: string
+      - description: New user password
+        in: formData
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/rr.JSONResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rr.JSONResponse'
+      summary: Creates new user
       tags:
       - auth
 securityDefinitions:

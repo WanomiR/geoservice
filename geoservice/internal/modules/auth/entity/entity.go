@@ -5,15 +5,12 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 )
-
-type User struct {
-	Email    string `json:"email" binding:"required" example:"john.doe@gmail.com"`
-	Password string `json:"password" binding:"required" example:"password"`
-}
 
 type TokensPair struct {
 	AccessToken  string `json:"access_token"`
@@ -44,6 +41,22 @@ func NewAuth(issuer, audience, secret, cookieDomain string) *Auth {
 		CookiePath:   "/",
 		CookieName:   "__Host-refresh_token",
 	}
+}
+
+func (a *Auth) ValidateEmail(email string) error {
+	re := regexp.MustCompile(`^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$`)
+	if !re.MatchString(email) {
+		return errors.New("invalid email")
+	}
+	return nil
+}
+
+func (a *Auth) ValidatePassword(password string) error {
+	re := regexp.MustCompile(`.{3,}`)
+	if !re.MatchString(password) {
+		return errors.New("invalid password: must be at least 3 characters long")
+	}
+	return nil
 }
 
 func (a *Auth) EncryptPassword(password string) (string, error) {
@@ -120,7 +133,7 @@ func (a *Auth) CreateExpiredCookie() *http.Cookie {
 
 func (a *Auth) VerifyRequest(w http.ResponseWriter, r *http.Request) (string, *Claims, error) {
 	// try to get token from cookie
-	token, err := a.getCookie(r)
+	token, err := a.getCookieValue(r)
 	if err != nil {
 		// check header if no cookie found
 		if token, err = a.getTokenFromHeader(w, r); err != nil {
@@ -133,6 +146,7 @@ func (a *Auth) VerifyRequest(w http.ResponseWriter, r *http.Request) (string, *C
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
+
 		return []byte(a.Secret), nil
 	}
 
@@ -141,7 +155,7 @@ func (a *Auth) VerifyRequest(w http.ResponseWriter, r *http.Request) (string, *C
 
 	if _, err = jwt.ParseWithClaims(token, claims, parseClaims); err != nil {
 		if strings.HasPrefix(err.Error(), "token is expired by") {
-			return "", nil, errors.New("token is expired by")
+			return "", nil, errors.New("expired token")
 		}
 		return "", nil, err
 	}
@@ -154,7 +168,21 @@ func (a *Auth) VerifyRequest(w http.ResponseWriter, r *http.Request) (string, *C
 	return token, claims, nil
 }
 
-func (a *Auth) getCookie(r *http.Request) (string, error) {
+func (a *Auth) RequireAuthorization(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _, err := a.VerifyRequest(w, r)
+		if err != nil {
+			log.Println(err.Error())
+			w.WriteHeader(http.StatusUnauthorized)
+			_, _ = w.Write([]byte("Authorization required"))
+
+		} else {
+			next.ServeHTTP(w, r)
+		}
+	})
+}
+
+func (a *Auth) getCookieValue(r *http.Request) (string, error) {
 	cookie, err := r.Cookie(a.CookieName)
 	if err != nil || cookie.Value == "" {
 		return "", errors.New("invalid cookie")

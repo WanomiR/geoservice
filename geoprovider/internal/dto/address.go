@@ -1,4 +1,4 @@
-package entity
+package dto
 
 type Address struct {
 	City   string `json:"city"`
@@ -9,5 +9,5 @@ type Address struct {
 }
 
 type Addresses struct {
-	Addresses []*Address `json:"addresses"`
+	Addresses []Address `json:"addresses"`
 }
