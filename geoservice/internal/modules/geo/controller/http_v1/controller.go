@@ -2,19 +2,14 @@ package http_v1
 
 import (
 	"errors"
-	"geoservice/internal/modules/geo/entity"
+	"geoservice/internal/modules/geo/dto"
 	"github.com/wanomir/rr"
 	"net/http"
 )
 
 type GeoServicer interface {
-	AddressSearch(input string) ([]entity.Address, error)
-	GeoCode(lat, lng string) ([]entity.Address, error)
-}
-
-type GeoController struct {
-	geoService GeoServicer
-	rr         *rr.ReadResponder
+	AddressSearch(input string) ([]dto.Address, error)
+	GeoCode(lat, lng string) ([]dto.Address, error)
 }
 
 type AddressSearch struct {
@@ -24,6 +19,11 @@ type AddressSearch struct {
 type AddressGeocode struct {
 	Lat string `json:"lat" example:"55.753214" binding:"required"`
 	Lng string `json:"lng" example:"37.642589" binding:"required"`
+}
+
+type GeoController struct {
+	geoService GeoServicer
+	rr         *rr.ReadResponder
 }
 
 func NewGeoController(geoService GeoServicer, responder *rr.ReadResponder) *GeoController {

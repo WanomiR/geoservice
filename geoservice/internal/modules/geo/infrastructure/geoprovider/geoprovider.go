@@ -1,7 +1,7 @@
 package geoprovider
 
 import (
-	"geoservice/internal/modules/geo/entity"
+	"geoservice/internal/modules/geo/dto"
 	"github.com/wanomir/e"
 	"net/rpc"
 )
@@ -20,9 +20,9 @@ func NewProvider(host, port, serviceName string) (*Provider, error) {
 	return &Provider{client: client, serviceName: serviceName}, nil
 }
 
-func (p *Provider) AddressSearch(input string) ([]entity.Address, error) {
+func (p *Provider) AddressSearch(input string) ([]dto.Address, error) {
 	calling := p.serviceName + ".AddressSearch"
-	var addresses entity.Addresses
+	var addresses dto.Addresses
 
 	if err := p.client.Call(calling, input, &addresses); err != nil {
 		return nil, e.Wrap("error calling "+calling, err)
@@ -31,9 +31,9 @@ func (p *Provider) AddressSearch(input string) ([]entity.Address, error) {
 	return addresses.Addresses, nil
 }
 
-func (p *Provider) GeoCode(lat, lng string) ([]entity.Address, error) {
+func (p *Provider) GeoCode(lat, lng string) ([]dto.Address, error) {
 	calling := p.serviceName + ".GeoCode"
-	var addresses entity.Addresses
+	var addresses dto.Addresses
 
 	if err := p.client.Call(calling, []string{lat, lng}, &addresses); err != nil {
 		return nil, e.Wrap("error calling "+calling, err)

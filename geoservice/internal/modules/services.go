@@ -1,7 +1,7 @@
 package modules
 
 import (
-	egeo "geoservice/internal/modules/geo/entity"
+	"geoservice/internal/modules/geo/dto"
 	"net/http"
 )
 
@@ -13,8 +13,8 @@ type Auther interface {
 }
 
 type GeoProvider interface {
-	AddressSearch(input string) ([]egeo.Address, error)
-	GeoCode(lat, lng string) ([]egeo.Address, error)
+	AddressSearch(input string) ([]dto.Address, error)
+	GeoCode(lat, lng string) ([]dto.Address, error)
 }
 
 type Services struct {
