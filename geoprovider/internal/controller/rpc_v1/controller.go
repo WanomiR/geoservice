@@ -34,7 +34,7 @@ type GeoController struct {
 	service GeoProvider
 }
 
-func NewController(service GeoProvider) *GeoController {
+func NewGeoController(service GeoProvider) *GeoController {
 	return &GeoController{service: service}
 }
 

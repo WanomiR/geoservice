@@ -94,7 +94,7 @@ func (a *App) init() error {
 		usecase.NewGeoService(a.config.apiKey, a.config.secretKey),
 		fmt.Sprintf("%s:%s", a.config.redisHost, a.config.redisPort),
 	)
-	controller := cntrl.NewController(service)
+	controller := cntrl.NewGeoController(service)
 
 	a.server = rpc.NewServer()
 	if err := a.server.RegisterName(a.config.serviceName, controller); err != nil {
