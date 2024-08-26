@@ -41,11 +41,11 @@ func simulateLoad() {
 
 	for {
 		var geocode bytes.Buffer
-		json.NewEncoder(&geocode).Encode(v1.AddressGeocode{Lat: "55.753214", Lng: "37.642589"})
+		json.NewEncoder(&geocode).Encode(v1.RequestAddressGeocode{Lat: "55.753214", Lng: "37.642589"})
 		req1, _ := http.NewRequest(http.MethodPost, "http://localhost:8888/address/geocode", &geocode)
 
 		var address bytes.Buffer
-		json.NewEncoder(&address).Encode(v1.AddressSearch{Query: "Подкопаевский переулок"})
+		json.NewEncoder(&address).Encode(v1.RequestAddressSearch{Query: "Подкопаевский переулок"})
 		req2, _ := http.NewRequest(http.MethodPost, "http://localhost:8888/address/search", &address)
 
 		requests := []http.Request{*req1, *req2}
