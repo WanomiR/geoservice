@@ -1,4 +1,4 @@
-package rpc_v1
+package jsonrpc_v1
 
 import (
 	"geoprovider/internal/dto"
@@ -25,6 +25,15 @@ type GeoProvider interface {
 	GeoCode(lat, lng string) ([]dto.Address, error)
 }
 
+type AddressSearchArgs struct {
+	Address string
+}
+
+type GeoCodeArgs struct {
+	Lat string
+	Lng string
+}
+
 type GeoController struct {
 	service GeoProvider
 }
@@ -34,11 +43,12 @@ func NewGeoController(service GeoProvider) *GeoController {
 	return &GeoController{service: service}
 }
 
-func (c *GeoController) AddressSearch(input string, reply *dto.Addresses) error {
+func (c *GeoController) AddressSearch(args *AddressSearchArgs, reply *dto.Addresses) error {
+
 	// for measuring response latency
 	start := time.Now()
 
-	addresses, err := c.service.AddressSearch(input)
+	addresses, err := c.service.AddressSearch(args.Address)
 	if err != nil {
 		return e.Wrap("error fetching addresses", err)
 	}
@@ -53,11 +63,11 @@ func (c *GeoController) AddressSearch(input string, reply *dto.Addresses) error 
 	return nil
 }
 
-func (c *GeoController) GeoCode(args []string, reply *dto.Addresses) error {
+func (c *GeoController) GeoCode(args *GeoCodeArgs, reply *dto.Addresses) error {
 	// for measuring response time
 	start := time.Now()
 
-	addresses, err := c.service.GeoCode(args[0], args[1])
+	addresses, err := c.service.GeoCode(args.Lat, args.Lng)
 	if err != nil {
 		return e.Wrap("error fetching addresses", err)
 	}

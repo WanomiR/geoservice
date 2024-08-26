@@ -39,6 +39,7 @@ type Config struct {
 	providerPort string
 	providerName string
 	appVersion   string
+	rpcProtocol  string
 }
 
 type App struct {
@@ -82,7 +83,12 @@ func (a *App) init() (err error) {
 		return err
 	}
 
-	geoProvider, err := geoprovider.NewProvider(a.config.providerHost, a.config.providerPort, a.config.providerName)
+	geoProvider, err := geoprovider.NewGeoProvider(
+		a.config.providerHost,
+		a.config.providerPort,
+		a.config.providerName,
+		a.config.rpcProtocol,
+	)
 	if err != nil {
 		return err
 	}
@@ -118,6 +124,7 @@ func (a *App) readConfig() error {
 		providerPort: os.Getenv("GEOPROVIDER_PORT"),
 		providerName: os.Getenv("GEOPROVIDER_NAME"),
 		appVersion:   os.Getenv("APP_VERSION"),
+		rpcProtocol:  os.Getenv("RPC_PROTOCOL"),
 	}
 
 	if a.config.host == "" || a.config.port == "" || a.config.jwtSecret == "" || a.config.providerHost == "" || a.config.providerPort == "" {

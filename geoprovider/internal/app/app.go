@@ -4,15 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	cntrl "geoprovider/internal/controller/rpc_v1"
 	"geoprovider/internal/usecase"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/wanomir/e"
 	"log"
-	"net"
 	"net/http"
-	"net/rpc"
 	"os"
 	"os/signal"
 	"syscall"
@@ -33,6 +30,7 @@ type Config struct {
 	host        string
 	port        string
 	serviceName string
+	rpcProtocol string
 	apiKey      string
 	secretKey   string
 	redisHost   string
@@ -42,7 +40,7 @@ type Config struct {
 
 type App struct {
 	config     Config
-	server     *rpc.Server
+	server     Server
 	signalChan chan os.Signal
 }
 
@@ -57,16 +55,9 @@ func NewApp() (*App, error) {
 }
 
 func (a *App) Start() {
-	listener, err := net.Listen("tcp", ":"+a.config.port)
-	if err != nil {
-		log.Fatal(e.Wrap("failed to listen", err))
-	}
+	fmt.Println("Started "+a.config.rpcProtocol+" server on port", a.config.port)
 
-	fmt.Println("Started rpc server on port", a.config.port)
-	for {
-		a.server.Accept(listener)
-	}
-
+	log.Fatal(a.server.ListenAndServe())
 }
 
 func (a *App) Shutdown() {
@@ -85,20 +76,15 @@ func (a *App) ServeMetrics() {
 	log.Fatal(http.ListenAndServe(":7778", nil))
 }
 
-func (a *App) init() error {
-	if err := a.readConfig(); err != nil {
+func (a *App) init() (err error) {
+	defer func() { err = e.WrapIfErr("error initializing app", err) }()
+
+	if err = a.readConfig(); err != nil {
 		return err
 	}
 
-	service := usecase.NewGeoCacheProxy(
-		usecase.NewGeoService(a.config.apiKey, a.config.secretKey),
-		fmt.Sprintf("%s:%s", a.config.redisHost, a.config.redisPort),
-	)
-	controller := cntrl.NewGeoController(service)
-
-	a.server = rpc.NewServer()
-	if err := a.server.RegisterName(a.config.serviceName, controller); err != nil {
-		return e.Wrap("error registering "+a.config.serviceName, err)
+	if a.server, err = a.createServer(a.config.rpcProtocol, a.config.serviceName, a.config.port); err != nil {
+		return err
 	}
 
 	a.signalChan = make(chan os.Signal, 1)
@@ -114,6 +100,7 @@ func (a *App) readConfig() error {
 		host:        os.Getenv("HOST"),
 		port:        os.Getenv("PORT"),
 		serviceName: os.Getenv("SERVICE_NAME"),
+		rpcProtocol: os.Getenv("RPC_PROTOCOL"),
 		apiKey:      os.Getenv("DADATA_API_KEY"),
 		secretKey:   os.Getenv("DADATA_SECRET_KEY"),
 		redisHost:   os.Getenv("REDIS_HOST"),
@@ -126,4 +113,21 @@ func (a *App) readConfig() error {
 	}
 
 	return nil
+}
+
+func (a *App) createServer(rpcProtocol, serviceName, port string) (Server, error) {
+	geoUsecase := usecase.NewGeoCacheProxy(
+		usecase.NewGeoService(a.config.apiKey, a.config.secretKey),
+		fmt.Sprintf("%s:%s", a.config.redisHost, a.config.redisPort),
+	)
+	serverConfig := ServerConfig{serviceName, port}
+
+	switch rpcProtocol {
+	case "rpc":
+		return NewRpcServer(geoUsecase, serverConfig), nil
+	case "json-rpc":
+		return NewJsonRpcServer(geoUsecase, serverConfig), nil
+	default:
+		return nil, errors.New("invalid protocol")
+	}
 }
