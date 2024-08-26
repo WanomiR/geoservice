@@ -2,27 +2,23 @@ package usecase
 
 import (
 	"encoding/json"
-	"geoprovider/internal/entity"
+	"geoprovider/internal/dto"
 	"github.com/gomodule/redigo/redis"
 	"github.com/wanomir/e"
 	"log"
 )
 
-type RedisPooler interface {
-	Dial() (redis.Conn, error)
-}
-
-type GeoProvider interface {
-	AddressSearch(input string) ([]entity.Address, error)
-	GeoCode(lat, lng string) ([]entity.Address, error)
+type GeoServicer interface {
+	AddressSearch(input string) ([]dto.Address, error)
+	GeoCode(lat, lng string) ([]dto.Address, error)
 }
 
 type GeoCacheProxy struct {
-	geo   GeoProvider
+	geo   GeoServicer
 	redis *redis.Pool
 }
 
-func NewGeoCacheProxy(geoservice GeoProvider, redisAddress string) *GeoCacheProxy {
+func NewGeoCacheProxy(geoservice GeoServicer, redisAddress string) *GeoCacheProxy {
 	redisPool := &redis.Pool{
 		Dial: func() (redis.Conn, error) {
 			return redis.Dial("tcp", redisAddress)
@@ -34,7 +30,7 @@ func NewGeoCacheProxy(geoservice GeoProvider, redisAddress string) *GeoCacheProx
 	}
 }
 
-func (p *GeoCacheProxy) AddressSearch(input string) (addresses []entity.Address, err error) {
+func (p *GeoCacheProxy) AddressSearch(input string) (addresses []dto.Address, err error) {
 	conn := p.redis.Get()
 	defer conn.Close()
 
@@ -59,7 +55,7 @@ func (p *GeoCacheProxy) AddressSearch(input string) (addresses []entity.Address,
 	return addresses, nil
 }
 
-func (p *GeoCacheProxy) GeoCode(lat, lng string) (addresses []entity.Address, err error) {
+func (p *GeoCacheProxy) GeoCode(lat, lng string) (addresses []dto.Address, err error) {
 	conn := p.redis.Get()
 	defer conn.Close()
 

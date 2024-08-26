@@ -1,4 +1,4 @@
-package entity
+package dto
 
 type Address struct {
 	City   string `json:"city"`
