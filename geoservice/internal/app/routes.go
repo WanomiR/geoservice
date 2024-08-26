@@ -14,17 +14,21 @@ func (a *App) routes() *chi.Mux {
 
 	r.Use(middleware.Recoverer)
 
-	// group for gathering metrics, doesn't include the `metrics` endpoint
+	// group for applying middleware
 	r.Group(func(r chi.Router) {
 
+		// apply middleware
+		r.Use(a.ZapLogger)
 		r.Use(a.RequestsCounter)
 		r.Use(a.RequestsLatency)
 
+		// main api endpoints
 		r.Route("/address", func(r chi.Router) {
 			r.Post("/search", a.controllers.Geo.AddressSearch)
 			r.Post("/geocode", a.controllers.Geo.AddressGeocode)
 		})
 
+		// authorization endpoints
 		r.Route("/auth", func(r chi.Router) {
 			r.Post("/register", a.controllers.Auth.Register)
 			r.Post("/login", a.controllers.Auth.Login)
@@ -33,7 +37,9 @@ func (a *App) routes() *chi.Mux {
 
 	})
 
+	// profiling endpoints
 	r.Route("/debug/pprof/", func(r chi.Router) {
+		// available only to authorized users
 		r.Use(a.services.Auth.RequireAuthorization)
 
 		r.Get("/", pprof.Index)

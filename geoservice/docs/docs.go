@@ -35,7 +35,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_geo_controller_http_v1.AddressGeocode"
+                            "$ref": "#/definitions/internal_modules_geo_controller_http_v1.RequestAddressGeocode"
                         }
                     }
                 ],
@@ -75,7 +75,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_modules_geo_controller_http_v1.AddressSearch"
+                            "$ref": "#/definitions/internal_modules_geo_controller_http_v1.RequestAddressSearch"
                         }
                     }
                 ],
@@ -204,7 +204,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "internal_modules_geo_controller_http_v1.AddressGeocode": {
+        "internal_modules_geo_controller_http_v1.RequestAddressGeocode": {
             "type": "object",
             "required": [
                 "lat",
@@ -221,7 +221,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_modules_geo_controller_http_v1.AddressSearch": {
+        "internal_modules_geo_controller_http_v1.RequestAddressSearch": {
             "type": "object",
             "required": [
                 "query"

@@ -24,7 +24,7 @@ func TestGeoService_AddressSearch(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			if _, err := geoService.AddressSearch(tc.query); err != nil && !tc.wantErr {
+			if _, err := geoService.AddressSearch(tc.query); (err != nil) != !tc.wantErr {
 				t.Errorf("AddressSearch() error = %v, wantErr %v", err, tc.wantErr)
 			}
 		})
@@ -43,7 +43,7 @@ func TestGeoService_GeoCode(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			if _, err := geoService.GeoCode(tc.lat, tc.lng); err != nil && !tc.wantErr {
+			if _, err := geoService.GeoCode(tc.lat, tc.lng); (err != nil) != !tc.wantErr {
 				t.Errorf("GeoCode() error = %v, wantErr %v", err, tc.wantErr)
 			}
 		})

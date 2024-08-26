@@ -27,6 +27,10 @@ var appInfo = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 	Help:      "App environment info",
 }, []string{"version"})
 
+func init() {
+	prometheus.MustRegister(appInfo)
+}
+
 type Config struct {
 	host         string
 	port         string
@@ -43,10 +47,6 @@ type App struct {
 	signalChan  chan os.Signal
 	services    *modules.Services
 	controllers *modules.Controllers
-}
-
-func init() {
-	prometheus.MustRegister(appInfo)
 }
 
 func NewApp() (*App, error) {

@@ -14,8 +14,8 @@ type GeoServicer interface {
 }
 
 type GeoCacheProxy struct {
-	geo   GeoServicer
-	redis *redis.Pool
+	geoService GeoServicer
+	redis      *redis.Pool
 }
 
 func NewGeoCacheProxy(geoservice GeoServicer, redisAddress string) *GeoCacheProxy {
@@ -25,8 +25,8 @@ func NewGeoCacheProxy(geoservice GeoServicer, redisAddress string) *GeoCacheProx
 		},
 	}
 	return &GeoCacheProxy{
-		geo:   geoservice,
-		redis: redisPool,
+		geoService: geoservice,
+		redis:      redisPool,
 	}
 }
 
@@ -37,12 +37,11 @@ func (p *GeoCacheProxy) AddressSearch(input string) (addresses []dto.Address, er
 	cachedData, err := redis.Bytes(conn.Do("GET", input))
 	if err == nil {
 		err = json.Unmarshal(cachedData, &addresses)
-		log.Println("loaded addresses from cache")
 
 		return addresses, err
 	}
 
-	if addresses, err = p.geo.AddressSearch(input); err != nil {
+	if addresses, err = p.geoService.AddressSearch(input); err != nil {
 		return nil, e.Wrap("error fetching addresses", err)
 	}
 
@@ -50,7 +49,6 @@ func (p *GeoCacheProxy) AddressSearch(input string) (addresses []dto.Address, er
 	if _, err = conn.Do("SETEX", input, 60*60*24, serialized); err != nil {
 		log.Println("error caching addresses", err)
 	}
-	log.Println("cached addresses")
 
 	return addresses, nil
 }
@@ -64,12 +62,11 @@ func (p *GeoCacheProxy) GeoCode(lat, lng string) (addresses []dto.Address, err e
 	cachedData, err := redis.Bytes(conn.Do("GET", key))
 	if err == nil {
 		err = json.Unmarshal(cachedData, &addresses)
-		log.Println("loaded addresses from cache")
 
 		return addresses, err
 	}
 
-	if addresses, err = p.geo.GeoCode(lat, lng); err != nil {
+	if addresses, err = p.geoService.GeoCode(lat, lng); err != nil {
 		return nil, e.Wrap("error fetching addresses", err)
 	}
 
@@ -77,7 +74,6 @@ func (p *GeoCacheProxy) GeoCode(lat, lng string) (addresses []dto.Address, err e
 	if _, err = conn.Do("SETEX", key, 60*60*24, serialized); err != nil {
 		log.Println("error caching addresses", err)
 	}
-	log.Println("cached addresses")
 
 	return addresses, nil
 }

@@ -1,6 +1,6 @@
 basePath: /
 definitions:
-  internal_modules_geo_controller_http_v1.AddressGeocode:
+  internal_modules_geo_controller_http_v1.RequestAddressGeocode:
     properties:
       lat:
         example: "55.753214"
@@ -12,7 +12,7 @@ definitions:
     - lat
     - lng
     type: object
-  internal_modules_geo_controller_http_v1.AddressSearch:
+  internal_modules_geo_controller_http_v1.RequestAddressSearch:
     properties:
       query:
         example: Подкопаевский переулок
@@ -46,7 +46,7 @@ paths:
         name: query
         required: true
         schema:
-          $ref: '#/definitions/internal_modules_geo_controller_http_v1.AddressGeocode'
+          $ref: '#/definitions/internal_modules_geo_controller_http_v1.RequestAddressGeocode'
       produces:
       - application/json
       responses:
@@ -72,7 +72,7 @@ paths:
         name: query
         required: true
         schema:
-          $ref: '#/definitions/internal_modules_geo_controller_http_v1.AddressSearch'
+          $ref: '#/definitions/internal_modules_geo_controller_http_v1.RequestAddressSearch'
       produces:
       - application/json
       responses:

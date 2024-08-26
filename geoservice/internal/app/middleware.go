@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/prometheus/client_golang/prometheus"
+	"go.uber.org/zap"
 	"net/http"
 	"time"
 )
@@ -22,6 +23,24 @@ var requestsLatency = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 func init() {
 	prometheus.MustRegister(requestsCount)
 	prometheus.MustRegister(requestsLatency)
+}
+
+func (a *App) ZapLogger(next http.Handler) http.Handler {
+	cfg := zap.NewProductionConfig()
+	cfg.Level = zap.NewAtomicLevelAt(zap.InfoLevel)
+	cfg.DisableCaller = true
+
+	logger := zap.Must(cfg.Build())
+	defer logger.Sync()
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		next.ServeHTTP(w, r)
+		logger.Info("incoming request",
+			zap.String("path", r.URL.Path),
+			zap.String("method", r.Method),
+			zap.String("addr", r.RemoteAddr),
+		)
+	})
 }
 
 func (a *App) RequestsCounter(next http.Handler) http.Handler {
