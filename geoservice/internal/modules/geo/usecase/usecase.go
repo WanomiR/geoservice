@@ -18,19 +18,19 @@ func NewGeoService(provider GeoProvider) *GeoService {
 }
 
 func (g *GeoService) AddressSearch(input string) ([]dto.Address, error) {
-	res, err := g.geoProvider.AddressSearch(input)
+	addresses, err := g.geoProvider.AddressSearch(input)
 	if err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	return addresses, nil
 }
 
 func (g *GeoService) GeoCode(lat, lng string) ([]dto.Address, error) {
-	res, err := g.geoProvider.GeoCode(lat, lng)
+	addresses, err := g.geoProvider.GeoCode(lat, lng)
 	if err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	return addresses, nil
 }
