@@ -1,7 +1,6 @@
 package app
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"geoprovider/internal/usecase"
@@ -13,7 +12,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 )
 
 var appInfo = prometheus.NewGaugeVec(prometheus.GaugeOpts{
@@ -29,7 +27,7 @@ func init() {
 type Config struct {
 	host        string
 	port        string
-	serviceName string
+	rpcName     string
 	rpcProtocol string
 	apiKey      string
 	secretKey   string
@@ -63,10 +61,7 @@ func (a *App) Start() {
 func (a *App) Shutdown() {
 	<-a.signalChan
 
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
-	defer cancel()
-
-	<-ctx.Done()
+	a.server.Shutdown()
 
 	fmt.Println("Shutting down server gracefully")
 }
@@ -83,7 +78,7 @@ func (a *App) init() (err error) {
 		return err
 	}
 
-	if a.server, err = a.createServer(a.config.rpcProtocol, a.config.serviceName, a.config.port); err != nil {
+	if a.server, err = a.createServer(a.config.rpcProtocol, a.config.rpcName, a.config.port); err != nil {
 		return err
 	}
 
@@ -99,7 +94,7 @@ func (a *App) readConfig() error {
 	a.config = Config{
 		host:        os.Getenv("HOST"),
 		port:        os.Getenv("PORT"),
-		serviceName: os.Getenv("SERVICE_NAME"),
+		rpcName:     os.Getenv("RPC_NAME"),
 		rpcProtocol: os.Getenv("RPC_PROTOCOL"),
 		apiKey:      os.Getenv("DADATA_API_KEY"),
 		secretKey:   os.Getenv("DADATA_SECRET_KEY"),
@@ -115,18 +110,17 @@ func (a *App) readConfig() error {
 	return nil
 }
 
-func (a *App) createServer(rpcProtocol, serviceName, port string) (Server, error) {
-	geoUsecase := usecase.NewGeoCacheProxy(
+func (a *App) createServer(protocol, name, port string) (Server, error) {
+	service := usecase.NewGeoCacheProxy(
 		usecase.NewGeoService(a.config.apiKey, a.config.secretKey),
 		fmt.Sprintf("%s:%s", a.config.redisHost, a.config.redisPort),
 	)
-	serverConfig := ServerConfig{serviceName, port}
 
-	switch rpcProtocol {
+	switch protocol {
 	case "rpc":
-		return NewRpcServer(geoUsecase, serverConfig), nil
+		return NewRpcServer(service, name, port), nil
 	case "json-rpc":
-		return NewJsonRpcServer(geoUsecase, serverConfig), nil
+		return NewJsonRpcServer(service, name, port), nil
 	default:
 		return nil, errors.New("invalid protocol")
 	}
