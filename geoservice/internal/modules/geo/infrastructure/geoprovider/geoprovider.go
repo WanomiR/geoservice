@@ -1,43 +1,24 @@
 package geoprovider
 
 import (
+	"errors"
 	"geoservice/internal/modules/geo/dto"
-	"github.com/wanomir/e"
-	"net/rpc"
+	"geoservice/internal/modules/geo/infrastructure/geoprovider/jsonrpc_v1"
+	"geoservice/internal/modules/geo/infrastructure/geoprovider/rpc_v1"
 )
 
-type Provider struct {
-	client      *rpc.Client
-	serviceName string
+type GeoProvider interface {
+	AddressSearch(input string) ([]dto.Address, error)
+	GeoCode(lat, lng string) ([]dto.Address, error)
 }
 
-func NewProvider(host, port, serviceName string) (*Provider, error) {
-	client, err := rpc.Dial("tcp", host+":"+port)
-	if err != nil {
-		return nil, e.Wrap("error dialing rpc service", err)
+func NewGeoProvider(host, port, serviceName, rpcProtocol string) (GeoProvider, error) {
+	switch rpcProtocol {
+	case "rpc":
+		return rpc_v1.NewProvider(host, port, serviceName)
+	case "json-rpc":
+		return jsonrpc_v1.NewProvider(host, port, serviceName)
+	default:
+		return nil, errors.New("unknown rpc protocol: " + rpcProtocol)
 	}
-
-	return &Provider{client: client, serviceName: serviceName}, nil
-}
-
-func (p *Provider) AddressSearch(input string) ([]dto.Address, error) {
-	calling := p.serviceName + ".AddressSearch"
-	var addresses dto.Addresses
-
-	if err := p.client.Call(calling, input, &addresses); err != nil {
-		return nil, e.Wrap("error calling "+calling, err)
-	}
-
-	return addresses.Addresses, nil
-}
-
-func (p *Provider) GeoCode(lat, lng string) ([]dto.Address, error) {
-	calling := p.serviceName + ".GeoCode"
-	var addresses dto.Addresses
-
-	if err := p.client.Call(calling, []string{lat, lng}, &addresses); err != nil {
-		return nil, e.Wrap("error calling "+calling, err)
-	}
-
-	return addresses.Addresses, nil
 }

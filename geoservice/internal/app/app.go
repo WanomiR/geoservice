@@ -32,13 +32,14 @@ func init() {
 }
 
 type Config struct {
-	host         string
-	port         string
-	jwtSecret    string
-	providerHost string
-	providerPort string
-	providerName string
-	appVersion   string
+	host             string
+	port             string
+	jwtSecret        string
+	providerName     string
+	providerHost     string
+	providerPort     string
+	providerProtocol string
+	appVersion       string
 }
 
 type App struct {
@@ -82,10 +83,16 @@ func (a *App) init() (err error) {
 		return err
 	}
 
-	geoProvider, err := geoprovider.NewProvider(a.config.providerHost, a.config.providerPort, a.config.providerName)
+	geoProvider, err := geoprovider.NewGeoProvider(
+		a.config.providerHost,
+		a.config.providerPort,
+		a.config.providerName,
+		a.config.providerProtocol,
+	)
 	if err != nil {
 		return err
 	}
+
 	geoService := usecase.NewGeoService(geoProvider)
 
 	dbRepo := repository.NewMapDBRepo(dto.User{Email: "john.doe@gmail.com", Password: "password"})
@@ -111,13 +118,14 @@ func (a *App) init() (err error) {
 
 func (a *App) readConfig() error {
 	a.config = Config{
-		host:         os.Getenv("HOST"),
-		port:         os.Getenv("PORT"),
-		jwtSecret:    os.Getenv("JWT_SECRET"),
-		providerHost: os.Getenv("GEOPROVIDER_HOST"),
-		providerPort: os.Getenv("GEOPROVIDER_PORT"),
-		providerName: os.Getenv("GEOPROVIDER_NAME"),
-		appVersion:   os.Getenv("APP_VERSION"),
+		host:             os.Getenv("HOST"),
+		port:             os.Getenv("PORT"),
+		jwtSecret:        os.Getenv("JWT_SECRET"),
+		providerName:     os.Getenv("GEOPROVIDER_NAME"),
+		providerHost:     os.Getenv("GEOPROVIDER_HOST"),
+		providerPort:     os.Getenv("GEOPROVIDER_PORT"),
+		providerProtocol: os.Getenv("GEOPROVIDER_PROTOCOL"),
+		appVersion:       os.Getenv("APP_VERSION"),
 	}
 
 	if a.config.host == "" || a.config.port == "" || a.config.jwtSecret == "" || a.config.providerHost == "" || a.config.providerPort == "" {
