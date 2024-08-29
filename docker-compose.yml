@@ -1,4 +1,18 @@
 services:
+  proxy:
+    build:
+      ./proxy
+    ports:
+      - 8080:8080
+    restart: always
+    depends_on:
+      - geo
+    environment:
+      APP_VERSION: 1.0.0
+      HOST: proxy
+      PORT: 8080
+      GEO_PORT: 1000
+
 
   geo:
     build:
