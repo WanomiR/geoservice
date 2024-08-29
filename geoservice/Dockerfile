@@ -16,4 +16,4 @@ COPY --from=builder /app/docs /docs
 
 EXPOSE 8888
 
-CMD ["/main"]
+CMD ["/main", "--simulate-load"]

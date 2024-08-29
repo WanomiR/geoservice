@@ -350,7 +350,7 @@
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "/^1\\.0\\.0$/",
+          "fields": "",
           "values": false
         },
         "showPercentChange": false,

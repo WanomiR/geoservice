@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"flag"
 	_ "geoservice/docs"
 	"geoservice/internal/app"
 	v1 "geoservice/internal/modules/geo/controller/http_v1"
@@ -12,6 +13,8 @@ import (
 	_ "net/http/pprof"
 	"time"
 )
+
+var simLoad = flag.Bool("simulate-load", false, "simulate service load")
 
 // @title GeoService
 // @version 1.0.0
@@ -24,6 +27,8 @@ import (
 // @in header
 // @name Authorization
 func main() {
+	flag.Parse()
+
 	a, err := app.NewApp()
 	if err != nil {
 		log.Fatal(err)
@@ -31,7 +36,9 @@ func main() {
 
 	go a.Start()
 
-	go simulateLoad()
+	if *simLoad {
+		go simulateLoad()
+	}
 
 	a.Shutdown()
 }
