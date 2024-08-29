@@ -86,6 +86,7 @@ func (a *App) init() (err error) {
 	signal.Notify(a.signalChan, syscall.SIGINT, syscall.SIGTERM)
 
 	appInfo.With(prometheus.Labels{"version": a.config.appVersion}).Set(1)
+	fmt.Println("App version:", a.config.appVersion)
 
 	return nil
 }

@@ -1,3 +1,4 @@
+
 LOCAL_BIN:=$(CURDIR)/bin
 
 generate: generate-rpc-api

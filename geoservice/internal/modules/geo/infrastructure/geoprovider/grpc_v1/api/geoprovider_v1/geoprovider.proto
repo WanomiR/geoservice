@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package geoprovider_v1;
+
+option go_package = "geoprovider/pkg/geoprovider_v1;geoprovider_v1";
+
+service GeoProviderV1 {
+  rpc AddressSearch(AddressRequest) returns (AddressesResponse);
+  rpc GeoCode(GeoRequest) returns (AddressesResponse);
+}
+
+message AddressRequest {
+  string query = 1;
+}
+
+message GeoRequest {
+  string lat = 1;
+  string lng = 2;
+}
+
+message AddressResponse {
+  string city = 1;
+  string street = 2;
+  string house = 3;
+  string lat = 4;
+  string lon = 5;
+}
+
+message AddressesResponse {
+  repeated AddressResponse addresses = 1;
+}
