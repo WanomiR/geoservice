@@ -1,38 +1,22 @@
 services:
-  geoservice:
-    build:
-      ./geoservice
-    ports:
-      - 8888:8888
-    depends_on:
-      - geoprovider
-    restart: always
-    environment:
-      APP_VERSION: 1.1.0
-      HOST: localhost
-      PORT: 8888
-      JWT_SECRET: ${JWT_SECRET}
-      GEOPROVIDER_HOST: geoprovider
-      GEOPROVIDER_PORT: 7777
-      GEOPROVIDER_NAME: ${RPC_NAME}
-      GEOPROVIDER_PROTOCOL: ${RPC_PROTOCOL}
 
-  geoprovider:
+  geo:
     build:
-      ./geoprovider
+      ./geo
+    ports:
+      - 1000:1000
     depends_on:
       - redis
     restart: always
     environment:
-      APP_VERSION: 1.1.0
-      HOST: geoprovider
-      PORT: 7777
+      APP_VERSION: 1.2.0
+      HOST: geo
+      PORT: 1000
+      METRICS_PORT: 1001
       DADATA_API_KEY: ${DADATA_API_KEY}
       DADATA_SECRET_KEY: ${DADATA_SECRET_KEY}
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      RPC_NAME: ${RPC_NAME}
-      RPC_PROTOCOL: ${RPC_PROTOCOL}
 
   redis:
     image: redis:latest
@@ -40,17 +24,19 @@ services:
 
   prometheus:
     image: prom/prometheus:latest
+    ports:
+      - 9090:9090
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-
-  grafana:
-    image: grafana/grafana:latest
-    ports:
-      - 3000:3000
-    environment:
-      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER}
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
-    volumes:
-      - ./grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
-      - ./grafana/dashboard.yaml:/etc/grafana/provisioning/dashboards/main.yaml
-      - ./grafana/dashboards:/etc/dashboards
+#
+#  grafana:
+#    image: grafana/grafana:latest
+#    ports:
+#      - 3000:3000
+#    environment:
+#      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER}
+#      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+#    volumes:
+#      - ./grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+#      - ./grafana/dashboard.yaml:/etc/grafana/provisioning/dashboards/main.yaml
+#      - ./grafana/dashboards:/etc/dashboards

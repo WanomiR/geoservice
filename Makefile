@@ -1,6 +1,6 @@
 include .env
 
-all: swagger_generate clear_logs build
+all: clear_logs build
 
 build:
 	@docker compose up --build --force-recreate
@@ -11,7 +11,7 @@ dump_logs:
 clear_logs:
 	@echo "" > .log
 
-swagger_generate: swagger_generate_geoservice
+swagger_generate: swagger_generate_geo
 
-swagger_generate_geoservice:
-	@cd geoservice && swag init --parseDependency -g ./cmd/api/main.go && cd ..
+swagger_generate_geo:
+	@cd geo && swag init --parseDependency -g ./cmd/api/main.go && cd ..
