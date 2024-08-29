@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"geoprovider/internal/dto"
-	"geoprovider/pkg/geoprovider_v1"
+	pb "geoprovider/pkg/geoprovider_v1"
 	"github.com/brianvoe/gofakeit/v7"
 	"testing"
 )
@@ -28,7 +28,7 @@ func TestGeoController_AddressSearch(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			req := &geoprovider_v1.AddressRequest{Query: tc.input}
+			req := &pb.AddressRequest{Query: tc.input}
 			if _, err := geoController.AddressSearch(context.Background(), req); (err != nil) != tc.wantErr {
 				t.Errorf("AddressSearch() error = %v, wantErr %v", err, tc.wantErr)
 			}
@@ -48,7 +48,7 @@ func TestGeoController_GeoCode(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			req := &geoprovider_v1.GeoRequest{Lat: tc.args[0], Lng: tc.args[1]}
+			req := &pb.GeoRequest{Lat: tc.args[0], Lng: tc.args[1]}
 			if _, err := geoController.GeoCode(context.Background(), req); (err != nil) != tc.wantErr {
 				t.Errorf("GeoCode() error = %v, wantErr %v", err, tc.wantErr)
 			}

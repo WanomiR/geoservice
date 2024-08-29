@@ -1,10 +1,15 @@
 package app
 
 import (
+	"errors"
+	"geoprovider/internal/controller/grpc_v1"
 	"geoprovider/internal/controller/jsonrpc_v1"
 	"geoprovider/internal/controller/rpc_v1"
 	"geoprovider/internal/usecase"
+	pb "geoprovider/pkg/geoprovider_v1"
 	"github.com/wanomir/e"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 	"log"
 	"net"
 	"net/rpc"
@@ -116,18 +121,29 @@ func (s *JsonRpcServer) ListenAndServe() (err error) {
 
 type GRpcServer struct {
 	*BaseServer
+	controller *grpc_v1.GeoController
+	grpcServer *grpc.Server
 }
 
 func NewGRpcServer(service usecase.GeoServicer, name, port string) *GRpcServer {
 	return &GRpcServer{
 		BaseServer: NewBaseServer(name, port),
+		controller: grpc_v1.NewGeoController(service),
+		grpcServer: grpc.NewServer(),
 	}
 }
 
 func (s *GRpcServer) ListenAndServe() error {
+	reflection.Register(s.grpcServer)
+	pb.RegisterGeoProviderV1Server(s.grpcServer, s.controller)
+
+	if err := s.grpcServer.Serve(s.BaseServer.listener); err != nil && !errors.Is(err, grpc.ErrServerStopped) {
+		return err
+	}
+
 	return nil
 }
 
 func (s *GRpcServer) Shutdown() {
-	s.shutdownCh <- true
+	s.grpcServer.GracefulStop()
 }
