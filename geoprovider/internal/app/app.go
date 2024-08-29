@@ -121,6 +121,8 @@ func (a *App) createServer(protocol, name, port string) (Server, error) {
 		return NewRpcServer(service, name, port), nil
 	case "json-rpc":
 		return NewJsonRpcServer(service, name, port), nil
+	case "grpc":
+		return NewGRpcServer(service, name, port), nil
 	default:
 		return nil, errors.New("invalid protocol")
 	}

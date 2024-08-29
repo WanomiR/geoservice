@@ -2,7 +2,9 @@ package rpc_v1
 
 import (
 	"errors"
+	"fmt"
 	"geoprovider/internal/dto"
+	"github.com/brianvoe/gofakeit/v7"
 	"testing"
 )
 
@@ -59,15 +61,44 @@ func NewMockGeoProvider() *MockGeoProvider {
 }
 
 func (m *MockGeoProvider) AddressSearch(input string) ([]dto.Address, error) {
+	addresses := make([]dto.Address, 0)
+
+	for i := 0; i < 10; i++ {
+		fakeAddress := gofakeit.Address()
+		address := dto.Address{
+			City:   fakeAddress.City,
+			Street: fakeAddress.Street,
+			House:  fakeAddress.Address,
+			Lat:    fmt.Sprintf("%f", fakeAddress.Latitude),
+			Lon:    fmt.Sprintf("%f", fakeAddress.Longitude),
+		}
+		addresses = append(addresses, address)
+	}
+
 	if input == "" {
 		return []dto.Address{}, errors.New("no address provided")
 	}
-	return []dto.Address{}, nil
+	return addresses, nil
 }
 
 func (m *MockGeoProvider) GeoCode(lat, lng string) ([]dto.Address, error) {
+	addresses := make([]dto.Address, 0)
+
 	if lat == "" || lng == "" {
-		return []dto.Address{}, errors.New("bad coordinates")
+		return addresses, errors.New("bad coordinates")
 	}
-	return []dto.Address{}, nil
+
+	for i := 0; i < 10; i++ {
+		fakeAddress := gofakeit.Address()
+		address := dto.Address{
+			City:   fakeAddress.City,
+			Street: fakeAddress.Street,
+			House:  fakeAddress.Address,
+			Lat:    fmt.Sprintf("%f", fakeAddress.Latitude),
+			Lon:    fmt.Sprintf("%f", fakeAddress.Longitude),
+		}
+		addresses = append(addresses, address)
+	}
+
+	return addresses, nil
 }

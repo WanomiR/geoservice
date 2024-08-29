@@ -1,9 +1,11 @@
-package jsonrpc_v1
+package grpc_v1
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"geoprovider/internal/dto"
+	"geoprovider/pkg/geoprovider_v1"
 	"github.com/brianvoe/gofakeit/v7"
 	"testing"
 )
@@ -26,8 +28,8 @@ func TestGeoController_AddressSearch(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			var reply dto.Addresses
-			if err := geoController.AddressSearch(&AddressSearchArgs{Address: tc.input}, &reply); (err != nil) != tc.wantErr {
+			req := &geoprovider_v1.AddressRequest{Query: tc.input}
+			if _, err := geoController.AddressSearch(context.Background(), req); (err != nil) != tc.wantErr {
 				t.Errorf("AddressSearch() error = %v, wantErr %v", err, tc.wantErr)
 			}
 		})
@@ -46,8 +48,8 @@ func TestGeoController_GeoCode(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			var reply dto.Addresses
-			if err := geoController.GeoCode(&GeoCodeArgs{Lat: tc.args[0], Lng: tc.args[1]}, &reply); (err != nil) != tc.wantErr {
+			req := &geoprovider_v1.GeoRequest{Lat: tc.args[0], Lng: tc.args[1]}
+			if _, err := geoController.GeoCode(context.Background(), req); (err != nil) != tc.wantErr {
 				t.Errorf("GeoCode() error = %v, wantErr %v", err, tc.wantErr)
 			}
 		})

@@ -113,3 +113,21 @@ func (s *JsonRpcServer) ListenAndServe() (err error) {
 		}
 	}
 }
+
+type GRpcServer struct {
+	*BaseServer
+}
+
+func NewGRpcServer(service usecase.GeoServicer, name, port string) *GRpcServer {
+	return &GRpcServer{
+		BaseServer: NewBaseServer(name, port),
+	}
+}
+
+func (s *GRpcServer) ListenAndServe() error {
+	return nil
+}
+
+func (s *GRpcServer) Shutdown() {
+	s.shutdownCh <- true
+}
