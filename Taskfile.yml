@@ -1,0 +1,21 @@
+version: 3
+
+silent: true
+dotenv: ['.env']
+
+includes:
+  geo: ./geo
+
+tasks:
+  default:
+    desc: Build the application and generate Swagger docs
+    cmds:
+      - task: geo:swagger_generate
+      - task: build
+
+  build: docker compose up --build --force-recreate
+
+  clear_logs: echo '' > .log
+
+  dump_logs: docker compose logs &> .log
+
