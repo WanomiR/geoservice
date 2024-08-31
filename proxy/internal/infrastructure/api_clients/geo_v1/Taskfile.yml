@@ -13,11 +13,6 @@ env:
   GOBIN: '{{.DIR}}/bin'
 
 tasks:
-  swagger:generate:
-    dir: '{{.DIR}}'
-    cmds:
-      - cmd: swag init --parseDependency -g ./cmd/api/main.go
-
   proto:generate:
     dir: '{{.DIR}}'
     cmds:
