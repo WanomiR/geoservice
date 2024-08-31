@@ -1,11 +1,92 @@
 basePath: /
+definitions:
+  internal_controller_http_v1.RequestAddressGeocode:
+    properties:
+      lat:
+        example: "55.753214"
+        type: string
+      lng:
+        example: "37.642589"
+        type: string
+    required:
+    - lat
+    - lng
+    type: object
+  internal_controller_http_v1.RequestAddressSearch:
+    properties:
+      query:
+        example: Подкопаевский переулок
+        type: string
+    required:
+    - query
+    type: object
+  rr.JSONResponse:
+    properties:
+      data: {}
+      error:
+        type: boolean
+      message:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact: {}
   description: Geoservice API
   title: Microservice Geoservice
   version: 2.0.0
-paths: {}
+paths:
+  /address/geocode:
+    post:
+      consumes:
+      - application/json
+      description: Returns a list of addresses provided geo coordinates
+      parameters:
+      - description: coordinates
+        in: body
+        name: query
+        required: true
+        schema:
+          $ref: '#/definitions/internal_controller_http_v1.RequestAddressGeocode'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/rr.JSONResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rr.JSONResponse'
+      summary: Search by coordinates
+      tags:
+      - address
+  /api/address/search:
+    post:
+      consumes:
+      - application/json
+      description: Returns a list of addresses provided street name
+      parameters:
+      - description: street name
+        in: body
+        name: query
+        required: true
+        schema:
+          $ref: '#/definitions/internal_controller_http_v1.RequestAddressSearch'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/rr.JSONResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rr.JSONResponse'
+      summary: Search by street name
+      tags:
+      - address
 securityDefinitions:
   ApiKeyAuth:
     in: header

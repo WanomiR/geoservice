@@ -17,8 +17,8 @@ func (a *App) routes() *chi.Mux {
 
 	r.Route("/api", func(r chi.Router) {
 		r.Route("/address", func(r chi.Router) {
-			r.Post("/search", nil)
-			r.Post("/geocode", nil)
+			r.Post("/search", a.control.AddressSearch)
+			r.Post("/geocode", a.control.AddressGeocode)
 		})
 	})
 
