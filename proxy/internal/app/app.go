@@ -13,7 +13,8 @@ import (
 	"os"
 	"os/signal"
 	"proxy/internal/controller/http_v1"
-	"proxy/internal/dto"
+	grpc_v1 "proxy/internal/infrastructure/api_clients/geo_v1"
+	"proxy/internal/usecase"
 	"proxy/pkg/logger"
 	"runtime/debug"
 	"time"
@@ -82,7 +83,10 @@ func (a *App) init() (err error) {
 	a.logger = logger.NewLogger(a.config.Log.Level)
 	a.errChan = make(chan error)
 
-	a.control = http_v1.NewController(NewMockService(), rr.NewReadResponder())
+	usecases := usecase.NewUsecases(
+		grpc_v1.NewGeoProvider(a.config.Geo.Host, a.config.Geo.Port),
+	)
+	a.control = http_v1.NewController(usecases, rr.NewReadResponder())
 
 	a.server = &http.Server{
 		Addr:         fmt.Sprintf("%s:%s", a.config.Host, a.config.Port),
@@ -128,18 +132,4 @@ func (a *App) serverShutdown(ctx context.Context) {
 		a.logger.Error(e.Wrap("error attempting http server shutdown", err).Error())
 	}
 	a.logger.Info("http server shutdown complete")
-}
-
-type MockService struct{}
-
-func NewMockService() *MockService {
-	return &MockService{}
-}
-
-func (m *MockService) AddressSearch(_ string) ([]dto.Address, error) {
-	return []dto.Address{}, nil
-}
-
-func (m *MockService) GeoCode(_, _ string) ([]dto.Address, error) {
-	return []dto.Address{}, nil
 }

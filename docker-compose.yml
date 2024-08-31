@@ -4,7 +4,7 @@ services:
       ./proxy
     ports:
       - 8080:8080
-    restart: always
+    restart: on-failure
     depends_on:
       - geo
     environment:
@@ -12,8 +12,8 @@ services:
       HOST: proxy
       PORT: 8080
       LOG_LEVEL: debug
-      GEO_PORT: 1000
       GEO_HOST: geo
+      GEO_PORT: 1000
 
 
   geo:
@@ -23,7 +23,7 @@ services:
       - 1000:1000
     depends_on:
       - redis
-    restart: always
+    restart: on-failure
     environment:
       APP_VERSION: 1.2.0
       HOST: geo

@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/address/geocode": {
+        "/api/address/geocode": {
             "post": {
                 "description": "Returns a list of addresses provided geo coordinates",
                 "consumes": [

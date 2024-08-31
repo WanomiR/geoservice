@@ -7,7 +7,7 @@ import (
 	"proxy/internal/dto"
 )
 
-type SuperUseCase interface {
+type SuperUsecase interface {
 	AddressSearch(query string) ([]dto.Address, error)
 	GeoCode(lat, lng string) ([]dto.Address, error)
 }
@@ -22,11 +22,11 @@ type RequestAddressGeocode struct {
 }
 
 type Controller struct {
-	usecase SuperUseCase
+	usecase SuperUsecase
 	rr      *rr.ReadResponder
 }
 
-func NewController(usecase SuperUseCase, readResponder *rr.ReadResponder) *Controller {
+func NewController(usecase SuperUsecase, readResponder *rr.ReadResponder) *Controller {
 	return &Controller{
 		usecase: usecase,
 		rr:      readResponder,

@@ -6,10 +6,10 @@ import (
 	"testing"
 )
 
-var usecase *UseCase
+var usecase *GeoUsecase
 
 func init() {
-	usecase = NewUseCase(NewMockProvider())
+	usecase = NewGeoUsecase(NewMockProvider())
 }
 
 func TestGeoService_AddressSearch(t *testing.T) {

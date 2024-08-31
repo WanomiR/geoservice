@@ -35,7 +35,7 @@ info:
   title: Microservice Geoservice
   version: 2.0.0
 paths:
-  /address/geocode:
+  /api/address/geocode:
     post:
       consumes:
       - application/json

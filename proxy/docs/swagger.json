@@ -9,7 +9,7 @@
     "host": "localhost:8080",
     "basePath": "/",
     "paths": {
-        "/address/geocode": {
+        "/api/address/geocode": {
             "post": {
                 "description": "Returns a list of addresses provided geo coordinates",
                 "consumes": [
