@@ -6,7 +6,7 @@ COPY . .
 
 RUN go mod init proxy && go mod tidy
 
-RUN go build -o main ./cmd/api
+RUN go build -o main ./cmd/app
 
 
 FROM alpine:latest

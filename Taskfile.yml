@@ -5,12 +5,13 @@ dotenv: ['.env']
 
 includes:
   geo: ./geo
+  proxy: ./proxy
 
 tasks:
   default:
     desc: Build the application and generate Swagger docs
     cmds:
-      - task: geo:swagger_generate
+      - task: proxy:swagger:generate
       - task: build
 
   build: docker compose up --build --force-recreate
