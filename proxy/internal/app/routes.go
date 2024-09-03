@@ -16,10 +16,30 @@ func (a *App) routes() *chi.Mux {
 	r.Use(a.ZapLogger)
 
 	r.Route("/api", func(r chi.Router) {
-		r.Route("/address", func(r chi.Router) {
-			r.Post("/search", a.control.AddressSearch)
-			r.Post("/geocode", a.control.AddressGeocode)
+		// available only to authorized users
+		r.Group(func(r chi.Router) {
+			r.Use(a.RequireAuthorization)
+
+			r.Route("/address", func(r chi.Router) {
+				r.Post("/search", a.control.AddressSearch)
+				r.Post("/geocode", a.control.AddressGeocode)
+			})
+
+			// users storage
+			r.Route("/user", func(r chi.Router) {
+				r.Get("/profile/{id}", nil)
+				r.Get("/list", nil)
+			})
+
 		})
+
+		// users registration and authorization
+		r.Route("/auth", func(r chi.Router) {
+			r.Post("/register", a.control.Register)
+			r.Post("/login", a.control.Login)
+			r.Get("/logout", a.control.Logout)
+		})
+
 	})
 
 	r.Get("/swagger/*", httpSwagger.Handler(

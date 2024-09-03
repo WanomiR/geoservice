@@ -19,11 +19,12 @@ type (
 		Port string `env-required:"true" env:"GEO_PORT"`
 	}
 
-	//Auth struct {
-	//	Host string `env-required:"true" env:"AUTH_HOST"`
-	//	Port string `env-required:"true" env:"AUTH_PORT"`
-	//}
-	//
+	Auth struct {
+		Host       string `env-required:"true" env:"AUTH_HOST"`
+		Port       string `env-required:"true" env:"AUTH_PORT"`
+		CookieName string `env-required:"true" env:"AUTH_COOKIE_NAME"`
+	}
+
 	//User struct {
 	//	Host string `env-required:"true" env:"USER_HOST"`
 	//	Port string `env-required:"true" env:"USER_PORT"`

@@ -1,4 +1,4 @@
-basePath: /
+basePath: /api
 definitions:
   internal_controller_http_v1.RequestAddressGeocode:
     properties:
@@ -35,11 +35,10 @@ info:
   title: Microservice Geoservice
   version: 2.0.0
 paths:
-  /api/address/geocode:
+  /address/geocode:
     post:
       consumes:
       - application/json
-      description: Returns a list of addresses provided geo coordinates
       parameters:
       - description: coordinates
         in: body
@@ -58,14 +57,15 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/rr.JSONResponse'
-      summary: Search by coordinates
+      security:
+      - ApiKeyAuth: []
+      summary: Returns a list of addresses provided geo coordinates
       tags:
       - address
-  /api/address/search:
+  /address/search:
     post:
       consumes:
       - application/json
-      description: Returns a list of addresses provided street name
       parameters:
       - description: street name
         in: body
@@ -84,9 +84,97 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/rr.JSONResponse'
-      summary: Search by street name
+      security:
+      - ApiKeyAuth: []
+      summary: Returns a list of addresses provided street name
       tags:
       - address
+  /auth/login:
+    post:
+      parameters:
+      - description: Email for login (john.doe@gmail.com)
+        in: formData
+        name: email
+        required: true
+        type: string
+      - description: Password for login (password)
+        in: formData
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/rr.JSONResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rr.JSONResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rr.JSONResponse'
+      summary: Logs user into the system
+      tags:
+      - auth
+  /auth/logout:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/rr.JSONResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rr.JSONResponse'
+      summary: Logs out current user
+      tags:
+      - auth
+  /auth/register:
+    post:
+      parameters:
+      - description: New user email
+        in: formData
+        name: email
+        required: true
+        type: string
+      - description: New user password
+        in: formData
+        name: password
+        required: true
+        type: string
+      - description: User first name
+        in: formData
+        name: firstName
+        type: string
+      - description: User last name
+        in: formData
+        name: lastName
+        type: string
+      - description: User age in years
+        in: formData
+        name: age
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/rr.JSONResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rr.JSONResponse'
+      summary: Creates new user
+      tags:
+      - auth
 securityDefinitions:
   ApiKeyAuth:
     in: header

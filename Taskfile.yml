@@ -16,7 +16,7 @@ tasks:
 
   build: docker compose up --build --force-recreate
 
-  clear_logs: echo '' > .log
+  logs:clear: echo '' > .log
 
-  dump_logs: docker compose logs &> .log
+  logs:dump: docker compose logs &> .log
 

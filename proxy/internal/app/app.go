@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/signal"
 	"proxy/internal/controller/http_v1"
+	"proxy/internal/dto"
 	grpc_v1 "proxy/internal/infrastructure/api_clients/geo_v1"
 	"proxy/internal/usecase"
 	"proxy/pkg/logger"
@@ -85,8 +86,10 @@ func (a *App) init() (err error) {
 
 	usecases := usecase.NewUsecases(
 		grpc_v1.NewGeoProvider(a.config.Geo.Host, a.config.Geo.Port),
+		// mock auth provider
+		NewMockAuthProvider([]dto.User{mockUser}),
 	)
-	a.control = http_v1.NewController(usecases, rr.NewReadResponder())
+	a.control = http_v1.NewController(usecases, rr.NewReadResponder(), a.logger)
 
 	a.server = &http.Server{
 		Addr:         fmt.Sprintf("%s:%s", a.config.Host, a.config.Port),
@@ -132,4 +135,52 @@ func (a *App) serverShutdown(ctx context.Context) {
 		a.logger.Error(e.Wrap("error attempting http server shutdown", err).Error())
 	}
 	a.logger.Info("http server shutdown complete")
+}
+
+// temporary code
+var mockUser = dto.User{
+	Id:        1,
+	Email:     "john.doe@gmail.com",
+	Password:  "password",
+	FirstName: "John",
+	LastName:  "Doe",
+	Age:       25,
+}
+
+type MockAuthProvider struct {
+	mockUsers []dto.User
+	token     string
+}
+
+func NewMockAuthProvider(users []dto.User) *MockAuthProvider {
+	return &MockAuthProvider{mockUsers: users, token: "token"}
+}
+
+func (m *MockAuthProvider) Register(email, _, _, _, _ string) (userId int, err error) {
+	for _, user := range m.mockUsers {
+		if user.Email == email {
+			return 0, errors.New("user already exists")
+		}
+	}
+	return len(m.mockUsers), nil
+}
+
+func (m *MockAuthProvider) Authorize(email, password string) (token string, cookie *http.Cookie, err error) {
+	for _, user := range m.mockUsers {
+		if user.Email == email && user.Password == password {
+			return m.token, new(http.Cookie), nil
+		}
+	}
+	return "", nil, errors.New("invalid credentials")
+}
+
+func (m *MockAuthProvider) ResetCookie() (cookie *http.Cookie, err error) {
+	return new(http.Cookie), nil
+}
+
+func (m *MockAuthProvider) VerifyToken(token string) (ok bool, err error) {
+	if token == m.token {
+		return true, nil
+	}
+	return false, errors.New("invalid token")
 }

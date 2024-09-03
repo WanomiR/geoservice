@@ -15,3 +15,15 @@ func (a *App) ZapLogger(next http.Handler) http.Handler {
 		)
 	})
 }
+
+func (a *App) RequireAuthorization(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := a.control.VerifyRequest(w, r); err != nil {
+			a.logger.Error("could not verify token", zap.Error(err))
+			w.WriteHeader(http.StatusUnauthorized)
+			_, _ = w.Write([]byte("Authorization required"))
+		} else {
+			next.ServeHTTP(w, r)
+		}
+	})
+}

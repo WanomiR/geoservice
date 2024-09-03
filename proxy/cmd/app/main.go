@@ -11,7 +11,7 @@ import (
 // @description Geoservice API
 
 // @host localhost:8080
-// @basePath /
+// @basePath /api
 
 // @securityDefinitions.apiKey ApiKeyAuth
 // @in header
