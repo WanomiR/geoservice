@@ -7,7 +7,6 @@ import (
 type AuthProvider interface {
 	Register(email, password, firstName, lastName, age string) (userId int, err error)
 	Authorize(email, password string) (token string, cookie *http.Cookie, err error)
-	ResetCookie() (cookie *http.Cookie, err error)
 	VerifyToken(token string) (ok bool, err error)
 }
 
@@ -31,13 +30,6 @@ func (a *AuthUsecase) Authorize(email, password string) (token string, cookie *h
 		return "", nil, err
 	}
 	return token, cookie, nil
-}
-
-func (a *AuthUsecase) ResetCookie() (cookie *http.Cookie, err error) {
-	if cookie, err = a.provider.ResetCookie(); err != nil {
-		return nil, err
-	}
-	return cookie, nil
 }
 
 func (a *AuthUsecase) VerifyToken(token string) (ok bool, err error) {

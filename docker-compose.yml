@@ -14,7 +14,8 @@ services:
       LOG_LEVEL: debug
       GEO_HOST: geo
       GEO_PORT: 1000
-
+      AUTH_HOST: auth
+      AUTH_PORT: 2000
 
   geo:
     build:
@@ -33,6 +34,20 @@ services:
       DADATA_SECRET_KEY: ${DADATA_SECRET_KEY}
       REDIS_HOST: redis
       REDIS_PORT: 6379
+
+  auth:
+    build:
+      ./auth
+    ports:
+      - 2000:2000
+    depends_on:
+      - redis
+    restart: on-failure
+    environment:
+      APP_VERSION: 1.0.0
+      HOST: auth
+      PORT: 2000
+      METRICS_PORT: 2001
 
   redis:
     image: redis:latest

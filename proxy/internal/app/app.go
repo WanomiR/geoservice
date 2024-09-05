@@ -48,7 +48,7 @@ func NewApp() (*App, error) {
 	a := &App{}
 
 	if err := a.init(); err != nil {
-		return nil, err
+		return nil, e.Wrap("failed to init app", err)
 	}
 
 	return a, nil
@@ -75,10 +75,8 @@ func (a *App) Run() (exitCode int) {
 }
 
 func (a *App) init() (err error) {
-	defer func() { err = e.WrapIfErr("error initializing app", err) }()
-
 	if err = a.readConfig(); err != nil {
-		return err
+		return e.Wrap("failed to read config", err)
 	}
 
 	a.logger = logger.NewLogger(a.config.Log.Level)
@@ -104,8 +102,6 @@ func (a *App) init() (err error) {
 }
 
 func (a *App) readConfig() (err error) {
-	defer func() { err = e.WrapIfErr("error reading config", err) }()
-
 	a.config = new(Config)
 	if err = cleanenv.ReadEnv(a.config); err != nil {
 		return err
@@ -124,7 +120,7 @@ func (a *App) recoverFromPanic(exitCode *int) {
 }
 
 func (a *App) listenAndServe() {
-	a.logger.Info("starting server on port " + a.config.Port)
+	a.logger.Info("started http server", zap.String("address", a.server.Addr))
 	if err := a.server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		a.errChan <- err
 	}
@@ -172,10 +168,6 @@ func (m *MockAuthProvider) Authorize(email, password string) (token string, cook
 		}
 	}
 	return "", nil, errors.New("invalid credentials")
-}
-
-func (m *MockAuthProvider) ResetCookie() (cookie *http.Cookie, err error) {
-	return new(http.Cookie), nil
 }
 
 func (m *MockAuthProvider) VerifyToken(token string) (ok bool, err error) {

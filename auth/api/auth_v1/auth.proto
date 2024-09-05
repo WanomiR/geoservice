@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package auth_v1;
+
+option go_package = "auth/pkg/auth_v1;auth_v1";
+
+service AuthProviderV1 {
+}
+
+message RegisterUserRequest {
+  string email = 1;
+  string password = 2;
+  string firstName = 3;
+  string lastName = 4;
+  uint32 age = 5;
+}
+
+message RegisterUserResponse {
+  uint64 userId = 1;
+  string error = 2;
+}

@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY . .
 
-RUN go mod init geo && go mod tidy
+RUN go mod init auth && go mod tidy
 
 RUN go build -o main ./cmd/api
 
@@ -13,6 +13,6 @@ FROM alpine:latest
 
 COPY --from=builder /app/main /main
 
-EXPOSE 1000
+EXPOSE 2000
 
 CMD ["/main"]

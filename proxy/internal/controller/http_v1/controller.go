@@ -16,7 +16,6 @@ type SuperUsecase interface {
 	GeoCode(lat, lng string) (addresses []dto.Address, err error)
 	Register(email, password, firstName, lastName, age string) (userId int, err error)
 	Authorize(email, password string) (token string, cookie *http.Cookie, err error)
-	ResetCookie() (cookie *http.Cookie, err error)
 	VerifyToken(token string) (ok bool, err error)
 }
 
@@ -166,25 +165,6 @@ func (c *Controller) Login(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, cookie)
 	_ = c.rr.WriteJSON(w, 200, resp)
 
-}
-
-// Logout godoc
-// @Summary Logs out current user
-// @Tags auth
-// @Produce json
-// @Success 200 {object} rr.JSONResponse
-// @Failure 500 {object} rr.JSONResponse
-// @Router /auth/logout [get]
-func (c *Controller) Logout(w http.ResponseWriter, _ *http.Request) {
-	cookie, err := c.usecase.ResetCookie()
-	if err != nil {
-		_ = c.rr.WriteJSONError(w, err, http.StatusInternalServerError)
-		return
-	}
-	http.SetCookie(w, cookie)
-
-	resp := rr.JSONResponse{Error: false, Message: "user logged out"}
-	_ = c.rr.WriteJSON(w, 200, resp)
 }
 
 func (c *Controller) VerifyRequest(w http.ResponseWriter, r *http.Request) error {

@@ -1,0 +1,52 @@
+version: 3
+
+silent: true
+
+vars:
+  DIR: '{{.DIR | default .TASKFILE_DIR}}'
+  NAME: '{{.NAME | default "auth"}}'
+  VERSION: '{{.VERSION | default "v1"}}'
+  PACKAGE_NAME: '{{.NAME}}_{{.VERSION}}'
+  SERVICE_NAME: '{{.NAME}}'
+
+env:
+  GOBIN: '{{.DIR}}/bin'
+
+tasks:
+  swagger:generate:
+    dir: '{{.DIR}}'
+    cmds:
+      - cmd: swag init --parseDependency -g ./cmd/api/main.go
+
+  proto:generate:
+    dir: '{{.DIR}}'
+    cmds:
+      - task: generate_grpc_api
+
+  generate_grpc_api:
+    deps: [install_deps]
+    cmds:
+      - 'mkdir -p ./pkg/{{.PACKAGE_NAME}}'
+      - "protoc --proto_path ./api/{{.PACKAGE_NAME}} \
+        --go_out=./pkg/{{.PACKAGE_NAME}} \
+        --go_opt=paths=source_relative \
+        --plugin=protoc-gen-go=./bin/protoc-gen-go \
+        --go-grpc_out=./pkg/{{.PACKAGE_NAME}} \
+        --go-grpc_opt=paths=source_relative \
+        --plugin=protoc-gen-go-grpc=./bin/protoc-gen-go-grpc \
+        ./api/{{.PACKAGE_NAME}}/{{.SERVICE_NAME}}.proto"
+
+
+  install_deps:
+    cmds:
+      - go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+      - go install -mod=mod google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+      - echo "generated protoc binaries at $GOBIN"
+    status:
+      - test -f $GOBIN/protoc-gen-go
+      - test -f $GOBIN/protoc-gen-go-grpc
+
+  get_deps:
+    cmds:
+      - go get -u google.golang.org/protobuf/cmd/protoc-gen-go
+      - go get -u google.golang.org/grpc/cmd/protoc-gen-go-grpc

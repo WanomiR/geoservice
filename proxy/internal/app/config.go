@@ -11,7 +11,7 @@ type (
 	}
 
 	Log struct {
-		Level string `env-required:"true" env:"LOG_LEVEL"`
+		Level string `env:"LOG_LEVEL" envDefault:"debug"`
 	}
 
 	Geo struct {

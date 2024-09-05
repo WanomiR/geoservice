@@ -30,14 +30,12 @@ func (a *App) routes() *chi.Mux {
 				r.Get("/profile/{id}", nil)
 				r.Get("/list", nil)
 			})
-
 		})
 
 		// users registration and authorization
 		r.Route("/auth", func(r chi.Router) {
 			r.Post("/register", a.control.Register)
 			r.Post("/login", a.control.Login)
-			r.Get("/logout", a.control.Logout)
 		})
 
 	})
