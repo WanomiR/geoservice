@@ -15,7 +15,7 @@ type SuperUsecase interface {
 	AddressSearch(query string) (addresses []dto.Address, err error)
 	GeoCode(lat, lng string) (addresses []dto.Address, err error)
 	Register(email, password, firstName, lastName, age string) (userId int, err error)
-	Authorize(email, password string) (token string, cookie *http.Cookie, err error)
+	Authorize(email, password string) (token string, err error)
 	VerifyToken(token string) (ok bool, err error)
 }
 
@@ -154,15 +154,13 @@ func (c *Controller) Login(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 
-	token, cookie, err := c.usecase.Authorize(email, password)
+	token, err := c.usecase.Authorize(email, password)
 	if err != nil {
 		_ = c.rr.WriteJSONError(w, e.Wrap("couldn't authorize user", err), 401)
 		return
 	}
 
 	resp := rr.JSONResponse{Error: false, Message: "user authorized", Data: token}
-
-	http.SetCookie(w, cookie)
 	_ = c.rr.WriteJSON(w, 200, resp)
 
 }

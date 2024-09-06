@@ -1,12 +1,8 @@
 package auth
 
-import (
-	"net/http"
-)
-
 type AuthProvider interface {
 	Register(email, password, firstName, lastName, age string) (userId int, err error)
-	Authorize(email, password string) (token string, cookie *http.Cookie, err error)
+	Authorize(email, password string) (token string, err error)
 	VerifyToken(token string) (ok bool, err error)
 }
 
@@ -25,11 +21,12 @@ func (a *AuthUsecase) Register(email, password, firstName, lastName, age string)
 	return userId, nil
 }
 
-func (a *AuthUsecase) Authorize(email, password string) (token string, cookie *http.Cookie, err error) {
-	if token, cookie, err = a.provider.Authorize(email, password); err != nil {
-		return "", nil, err
+func (a *AuthUsecase) Authorize(email, password string) (token string, err error) {
+	if token, err = a.provider.Authorize(email, password); err != nil {
+		return "", err
 	}
-	return token, cookie, nil
+
+	return token, nil
 }
 
 func (a *AuthUsecase) VerifyToken(token string) (ok bool, err error) {

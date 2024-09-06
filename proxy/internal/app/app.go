@@ -161,13 +161,13 @@ func (m *MockAuthProvider) Register(email, _, _, _, _ string) (userId int, err e
 	return len(m.mockUsers), nil
 }
 
-func (m *MockAuthProvider) Authorize(email, password string) (token string, cookie *http.Cookie, err error) {
+func (m *MockAuthProvider) Authorize(email, password string) (token string, err error) {
 	for _, user := range m.mockUsers {
 		if user.Email == email && user.Password == password {
-			return m.token, new(http.Cookie), nil
+			return m.token, nil
 		}
 	}
-	return "", nil, errors.New("invalid credentials")
+	return "", errors.New("invalid credentials")
 }
 
 func (m *MockAuthProvider) VerifyToken(token string) (ok bool, err error) {
